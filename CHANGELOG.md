@@ -5,6 +5,27 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.5.0] - 2026-09-04 — Sprint 4 · Permissions & Utils
+
+### Añadido
+
+- **Modelo de permisos de cuatro ejes** (`src/Permissions/`): rol × recurso × operación × campo
+- **Dos puertas independientes y ambas obligatorias.** La matriz del plugin expresa qué se expone hacia fuera; las capabilities de WordPress son el modelo de permisos real del sitio. **La matriz solo puede restringir, nunca ampliar** — si pudiera, un usuario sin `edit_posts` editaría contenido por REST porque alguien marcó mal una casilla, y la API sería una vía para eludir los permisos del sitio
+- **`PermissionMatrix`**: cascada de cuatro niveles donde gana la regla **más específica**, no la más permisiva. Un editor con `property.read` permitido y `property.read.price` denegado lee propiedades sin ver el precio. Denegación por defecto en toda combinación no declarada, de modo que actualizar el plugin nunca amplía el acceso de nadie
+- **`CapabilityMapper`**: deriva las capabilities del `capability_type` del post type, sin codificarlas a mano. Comprueba la capability de **objeto** además de la de colección — omitirla es el fallo de autorización más común en endpoints REST personalizados, porque concede a cualquier autor la edición del contenido ajeno
+- **`PermissionResolver`**: une las dos puertas y cachea por rol dentro de la petición. Las decisiones sobre un objeto concreto **no** se cachean, para que la resolución de un post no arrastre la de otro
+- **`FieldVisibility`**: asimetría deliberada entre lectura y escritura. En lectura los campos vetados **se omiten** —devolverlos como `null` confirmaría que existen—; en escritura se **rechaza la petición entera**, porque un `200` a un cliente que cree haber guardado el dato es una inconsistencia que aparece mucho después
+- **`CollectionRestrictor`**: acota los elementos visibles **en la consulta**, nunca filtrando el resultado después. Filtrar a posteriori rompe la paginación: pedir 20 y descartar 7 devuelve 13 y `X-WP-Total` deja de cuadrar
+- **`src/Utils/`**: `Arr`, `Str` y `Hash`, funciones puras sin estado
+- **Cinco puntos de extensión**: `codeia/permissions/can`, `field_visible`, `field_writable` y `collection_args`. El filtro `can` recibe el contexto con la decisión previa y el nivel de la cascada que la produjo — sin ese dato, el código de terceros solo podría decidir a ciegas
+- **57 tests nuevos**: 29 unitarios y 28 de integración contra roles y capabilities reales de WordPress
+
+### Notas técnicas
+
+- Cero comparaciones por nombre de rol en el camino de decisión: los roles son agrupaciones mutables de capabilities y cualquier plugin de membresía las altera. Se usan como eje de la matriz —es lo que un administrador entiende— pero la comprobación efectiva siempre acaba en `user_can()`
+- Una configuración con valores no interpretables **no concede acceso**: se ignora en vez de asumir permiso
+- `phpcs` con el estándar WordPress: **0 errores**
+
 ## [0.4.0] - 2026-09-04 — Sprint 3 · Authentication
 
 ### Añadido
