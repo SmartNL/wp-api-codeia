@@ -28,30 +28,25 @@ Roadmap completo, con el alcance y los tests de cada sprint, en [docs/planificac
 
 | | |
 | --- | --- |
-| Versión | `0.4.0` — sprint 3 (Authentication) completo |
-| Rama actual | `development` (sprints 1-3 fusionados) |
-| Tests | 162 unitarios + 65 integración, en verde |
+| Versión | `0.5.0` — sprint 4 (Permissions & Utils) completo |
+| Rama actual | `development` (sprints 1-4 fusionados) |
+| Tests | 191 unitarios + 93 integración, en verde |
 | `phpcs` | 0 errores (1 aviso, falso positivo de `prepare`) |
-| Siguiente sprint | **4 · Permissions & Utils** → `v0.5.0` |
+| Siguiente sprint | **5 · Endpoints CRUD** → `v0.6.0` |
 | Remoto | [SmartNL/wp-api-codeia](https://github.com/SmartNL/wp-api-codeia) (privado) |
 
 ### Para retomar
 
-`development` tiene los sprints 1, 2 y 3. El siguiente paso es el **sprint 4 · Permissions & Utils** (`v0.5.0`), documento [04-permisos.md](docs/04-permisos.md):
+El siguiente paso es el **sprint 5 · Endpoints CRUD** (`v0.6.0`), documentos [02-endpoints-dinamicos.md](docs/02-endpoints-dinamicos.md) y [07-rewrite-rules.md](docs/07-rewrite-rules.md).
 
 ```bash
 git switch development && git pull
-git switch -c sprint/04-permissions-utils
+git switch -c sprint/05-endpoints-crud
 ```
 
-Entregables: `src/Permissions/` (`PermissionResolver`, `PermissionMatrix`, `PermissionContext`, `FieldVisibility`, `CapabilityMapper`, `CollectionRestrictor`) y `src/Utils/` (`Str`, `Arr`, `Hash`).
+Entregables: `src/Api/` (`RouteRegistrar`, `ControllerFactory`, `ResourceController` sobre `WP_REST_Controller`, `QueryBuilder`, `FieldProjector`, `CursorPaginator`, `ResponseFormatter`, `ErrorFormatter`) y `src/Rewrite/` (`RewriteModule`, `CollisionDetector`, `RequestForwarder`).
 
-Contrapartida ya asumida: los endpoints reales llegan en el sprint 5, así que los tests de integración del 4 registran rutas mínimas desde el propio fixture para ejercitar `PermissionResolver` contra WordPress real.
-
-Antes de nada, recrear el `php.ini` del scratchpad si la sesión es nueva — ver «Entorno de desarrollo en esta máquina».
-
-**Existe ya:** núcleo completo, `src/Schema/` (detección en 4 niveles) y `src/Auth/` (cadena de 4 proveedores, JWT, rotación de refresh, revocación) con sus endpoints `/auth/token` y `/auth/refresh`.
-**No existe todavía:** `src/Permissions/`, el resto de `src/Api/`, `src/Media/`, `src/Security/`, `src/OpenApi/`, `src/Admin/`, `src/Modules/`, `src/Rewrite/`, `src/Utils/` ni `admin-ui/`. De los 12 documentos de arquitectura hay 3 implementados.
+Las rutas nacen con el `PermissionResolver` del sprint 4: **no hay `permission_callback` provisional en ningún momento**.
 
 ### Entorno de desarrollo en esta máquina
 
