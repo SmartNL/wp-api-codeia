@@ -28,11 +28,11 @@ Roadmap completo, con el alcance y los tests de cada sprint, en [docs/planificac
 
 | | |
 | --- | --- |
-| Versión | `0.6.0` — sprint 5 (Endpoints CRUD) completo |
-| Rama actual | `sprint/05-endpoints-crud` |
-| Tests | 202 unitarios + 119 integración, en verde |
+| Versión | `0.7.0` — sprint 6 (Media & Security) completo |
+| Rama actual | `sprint/06-media-security` |
+| Tests | 219 unitarios + 135 integración, en verde |
 | `phpcs` | 0 errores (1 aviso, falso positivo de `prepare`) |
-| Siguiente sprint | **6 · Media & Security** → `v0.7.0` |
+| Siguiente sprint | **7 · Swagger & Performance** → `v0.8.0` |
 | Remoto | [SmartNL/wp-api-codeia](https://github.com/SmartNL/wp-api-codeia) (privado) |
 
 ### Para retomar
@@ -63,6 +63,8 @@ extension=mbstring
 extension=zip
 extension=fileinfo
 extension=mysqli
+extension=gd
+extension=exif
 memory_limit=512M
 ```
 
