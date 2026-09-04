@@ -152,4 +152,20 @@
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
+
+	<!--
+		base64 es parte del formato JWT: un JWS compacto son tres segmentos
+		base64url. Tambien lo usan la generacion de credenciales opacas y la
+		lectura del esquema Basic de las Application Passwords. El sniff avisa
+		por si se usa para ofuscar codigo, que no es el caso.
+	-->
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode">
+		<exclude-pattern>src/Auth/*</exclude-pattern>
+		<exclude-pattern>tests/Unit/Auth/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode">
+		<exclude-pattern>src/Auth/*</exclude-pattern>
+		<exclude-pattern>tests/Unit/Auth/*</exclude-pattern>
+	</rule>
+
 </ruleset>

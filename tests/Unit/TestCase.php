@@ -98,6 +98,20 @@ abstract class TestCase extends PhpUnitTestCase {
 			}
 		);
 
+		Functions\when( 'is_wp_error' )->alias(
+			static function ( $thing ): bool {
+
+				return $thing instanceof \WP_Error;
+			}
+		);
+
+		Functions\when( '__' )->alias(
+			static function ( string $text ): string {
+
+				return $text;
+			}
+		);
+
 		Functions\when( 'is_protected_meta' )->alias(
 			static function ( string $key ): bool {
 

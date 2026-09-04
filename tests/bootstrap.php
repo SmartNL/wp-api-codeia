@@ -51,6 +51,10 @@ if ( ! codeia_is_integration_run() ) {
 	defined( 'CODEIA_PLUGIN_FILE' ) || define( 'CODEIA_PLUGIN_FILE', $codeia_root . '/wp-api-codeia.php' );
 
 	// Constantes de tiempo del nucleo que usan CacheManager y Logger.
+	// WP_Error no lo aporta Brain Monkey. La suite de integracion usa la clase
+	// real de WordPress; aqui hace falta un equivalente reducido.
+	require_once $codeia_root . '/tests/stubs/wp-error.php';
+
 	defined( 'MINUTE_IN_SECONDS' ) || define( 'MINUTE_IN_SECONDS', 60 );
 	defined( 'HOUR_IN_SECONDS' ) || define( 'HOUR_IN_SECONDS', 3600 );
 	defined( 'DAY_IN_SECONDS' ) || define( 'DAY_IN_SECONDS', 86400 );

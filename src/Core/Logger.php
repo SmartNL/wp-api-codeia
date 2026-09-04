@@ -62,6 +62,13 @@ final class Logger {
 	 */
 	private string $min_level;
 
+
+	/**
+	 * Si una escritura fallo y no merece la pena reintentar.
+	 *
+	 * @var bool
+	 */
+	private static bool $unavailable = false;
 	/**
 	 * Construye el logger.
 	 *
@@ -143,11 +150,20 @@ final class Logger {
 	 * @return bool Si se escribio la entrada.
 	 */
 	public function log( string $level, string $message, array $context = array(), string $channel = 'core' ): bool {
-		if ( ! $this->should_log( $level ) ) {
+		if ( ! $this->should_log( $level ) || self::$unavailable ) {
 			return false;
 		}
 
 		global $wpdb;
+
+		/*
+		 * Los errores se suprimen a proposito. Si la tabla no existe —una
+		 * activacion incompleta, un sitio de multisitio sin preparar— WordPress
+		 * imprimiria el error de base de datos en la salida, corrompiendo
+		 * cualquier respuesta JSON. Registrar es una funcion auxiliar: su fallo
+		 * nunca debe romper la peticion que lo invoca.
+		 */
+		$previous = $wpdb->suppress_errors( true );
 
 		$written = $wpdb->insert(
 			self::table_name(),
@@ -162,9 +178,39 @@ final class Logger {
 			array( '%s', '%s', '%s', '%s', '%s', '%d' )
 		);
 
-		return false !== $written;
+		$wpdb->suppress_errors( $previous );
+
+		if ( false === $written ) {
+			// No se reintenta en el resto de la peticion: si la tabla falta,
+			// va a seguir faltando y cada intento cuesta una consulta.
+			self::$unavailable = true;
+
+			return false;
+		}
+
+		return true;
 	}
 
+	/**
+	 * Indica si el registro esta inutilizable en esta peticion.
+	 *
+	 * Lo consulta el panel de estado para avisar de que no se estan guardando
+	 * eventos, en lugar de que el administrador lo descubra por su ausencia.
+	 *
+	 * @return bool
+	 */
+	public static function is_unavailable(): bool {
+		return self::$unavailable;
+	}
+
+	/**
+	 * Reinicia la bandera de indisponibilidad.
+	 *
+	 * @return void
+	 */
+	public static function reset_availability(): void {
+		self::$unavailable = false;
+	}
 	/**
 	 * Indica si un nivel supera el minimo configurado.
 	 *
