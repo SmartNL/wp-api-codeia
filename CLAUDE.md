@@ -33,9 +33,10 @@ Roadmap completo, con el alcance y los tests de cada sprint, en [docs/planificac
 | Tests | 55 unitarios + 17 integración, en verde |
 | `phpcs` | 0 errores, 0 avisos |
 | Siguiente sprint | **2 · Schema Detection** → `v0.3.0` |
+| Remoto | [SmartNL/wp-api-codeia](https://github.com/SmartNL/wp-api-codeia) (privado) |
 
 **Existe ya:** entry point, `Container`, `Plugin`, `Config`, caché en dos niveles, `Logger`, `EventDispatcher`, `Activator`, `uninstall.php` e infraestructura de tests.
-**No existe todavía:** `src/Schema/`, `src/Api/`, `src/Auth/`, `src/Permissions/`, `admin-ui/`.
+**No existe todavía:** `src/Schema/`, `src/Auth/`, `src/Permissions/`, `src/Api/`, `src/Media/`, `src/Security/`, `src/OpenApi/`, `src/Admin/`, `src/Modules/`, `src/Rewrite/`, `src/Utils/` ni `admin-ui/`. De los 12 documentos de arquitectura solo 1 está implementado.
 
 ### Entorno de desarrollo en esta máquina
 
@@ -86,17 +87,9 @@ El framework de tests de WordPress **reescribe `CREATE TABLE` como `CREATE TEMPO
 - Para verificar una tabla, usar `DESCRIBE` o consultarla directamente.
 - Si el plugin quedó activado en el sitio real, existirá además una tabla no temporal y `SHOW TABLES` dará un **falso positivo**.
 
-Plan completo en [docs/planificacion-sprints.md](docs/planificacion-sprints.md): 8 sprints, de `v0.2.0` a `v0.9.0`; `v1.0.0` al mergear a `main`.
-
 **Autenticación y permisos van antes que los endpoints** (sprints 3 y 4, frente al 5). Cuando llegan las rutas, la matriz de permisos ya existe: nacen con su `permission_callback` real y no hay ningún provisional que recordar eliminar.
 
-| Existe | No existe todavía |
-| ------ | ----------------- |
-| `docs/` — 12 documentos de arquitectura | `wp-api-codeia.php` (punto de entrada) |
-| `README.md`, `CHANGELOG.md` | `src/` (código PSR-4) |
-| `.editorconfig`, `.gitignore` | `composer.json`, `admin-ui/`, `tests/` |
-
-La arquitectura está **decidida y documentada**. Al empezar a escribir código, la documentación es la especificación: si algo del código contradice a `docs/`, se actualizan ambos en el mismo commit.
+La documentación es la especificación: si el código contradice a `docs/`, se actualizan ambos en el mismo commit.
 
 ## Qué es este plugin
 

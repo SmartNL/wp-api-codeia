@@ -2,28 +2,34 @@
 
 Roadmap de implementación en 8 sprints. Cada uno tiene su versión y su rama, y no se da por terminado hasta que su suite de tests está en verde.
 
-> **Estado actual:** `v0.2.0` — sprint 1 (Foundation) implementado y verificado en `sprint/01-foundation`. Sin commitear, a la espera del OK.
+> **Estado actual:** `v0.2.0` — sprint 1 (Foundation) completado y subido a la rama `sprint/01-foundation`. Las cifras en negrita son reales; el resto, estimaciones recalibradas con los datos del sprint 1.
 
 ---
 
 ## 1. Resumen
 
-| Sprint | Nombre | Versión | Archivos PHP | Archivos JS | Tests |
-| :----: | ------ | ------- | -----------: | ----------: | ----: |
-| — | *Documentación* | `v0.1.0` | 0 | 0 | — |
-| 1 | Foundation ✅ | `v0.2.0` | **16** | 0 | **72** |
-| 2 | Schema Detection | `v0.3.0` | ~15 | 0 | ~9 |
-| 3 | Authentication | `v0.4.0` | ~13 | 0 | ~9 |
-| 4 | Permissions & Utils | `v0.5.0` | ~9 | 0 | ~7 |
-| 5 | Endpoints CRUD | `v0.6.0` | ~11 | 0 | ~8 |
-| 6 | Media & Security | `v0.7.0` | ~10 | 0 | ~9 |
-| 7 | Swagger & Performance | `v0.8.0` | ~9 | 0 | ~7 |
-| 8 | Dashboard Admin | `v0.9.0` | ~16 | ~30 | ~13 |
-| **Total** | | **`v0.9.0`** | **~98** | **~30** | **~72** |
+| Sprint | Nombre | Versión | PHP | JS | Tests | Casos |
+| :----: | ------ | ------- | --: | -: | ----: | ----: |
+| — | *Documentación* | `v0.1.0` | 0 | 0 | — | — |
+| 1 | Foundation ✅ | `v0.2.0` | **16** | 0 | **7** | **72** |
+| 2 | Schema Detection | `v0.3.0` | ~15 | 0 | ~10 | ~75 |
+| 3 | Authentication | `v0.4.0` | ~13 | 0 | ~9 | ~60 |
+| 4 | Permissions & Utils | `v0.5.0` | ~9 | 0 | ~7 | ~50 |
+| 5 | Endpoints CRUD | `v0.6.0` | ~11 | 0 | ~9 | ~55 |
+| 6 | Media & Security | `v0.7.0` | ~10 | 0 | ~8 | ~50 |
+| 7 | Swagger & Performance | `v0.8.0` | ~9 | 0 | ~7 | ~40 |
+| 8 | Dashboard Admin | `v0.9.0` | ~16 | ~30 | ~9 | ~45 |
+| **Total** | | **`v0.9.0`** | **~99** | **~30** | **~66** | **~447** |
 
 `v1.0.0` se alcanza al mergear `development` → `main` con todo verificado.
 
-Las cifras son **estimaciones** derivadas de las clases que enumera cada documento de arquitectura; se sustituyen por los números reales al cerrar cada sprint. El total de PHP es alto porque el diseño es estrictamente PSR-4 de una clase por archivo: cuatro proveedores de detección, cinco de autenticación, tres drivers de caché y siete pantallas de administración son, por sí solos, diecinueve archivos.
+**Qué mide cada columna.** `PHP` y `JS` cuentan archivos de código de producción. `Tests` cuenta archivos de test; `Casos`, ejecuciones de PHPUnit — un método con `@dataProvider` produce varias. La distinción importa: el sprint 1 tiene 7 archivos, 64 métodos y 72 ejecuciones, tres cifras que se confunden con facilidad.
+
+**Recalibración tras el sprint 1.** Las estimaciones iniciales daban ~15 archivos PHP y «~10 tests» para Foundation. El recuento de archivos acertó (16 reales), pero la columna de tests mezclaba archivos y casos: 10 estimados frente a 72 ejecuciones reales. Las cifras de arriba ya separan ambas magnitudes y proyectan los sprints restantes con la densidad observada — en torno a **4 casos por clase de producción**, más en los sprints con lógica de seguridad o muchas ramas condicionales.
+
+Los sprints 2 y 3 llevan la densidad más alta del proyecto: la inferencia de tipos tiene numerosos casos límite documentados (valores `0/1` ambiguos, ceros a la izquierda, serializados) y la autenticación exige probar los ataques que debe rechazar, no solo el camino feliz.
+
+El total de PHP es alto porque el diseño es estrictamente PSR-4 de una clase por archivo: seis proveedores de detección, cinco autenticadores, tres drivers de caché y siete pantallas de administración son, por sí solos, veintiún archivos. Una referencia que agrupe varias clases por archivo dará cifras muy inferiores para el mismo alcance.
 
 ---
 
@@ -72,7 +78,7 @@ main          ●─●─●─●                    intocable · solo release
 | `development` | Integración continua de sprints | Solo merges desde ramas de sprint |
 | `sprint/NN-nombre` | Trabajo de un sprint | Commits de desarrollo |
 
-Sin remoto configurado: todo es local.
+Remoto: `origin` → [SmartNL/wp-api-codeia](https://github.com/SmartNL/wp-api-codeia) (privado). Las tres ramas tienen seguimiento configurado.
 
 ### Versionado
 
