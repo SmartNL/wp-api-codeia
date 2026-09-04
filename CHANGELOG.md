@@ -5,6 +5,28 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.7.0] - 2026-09-04 — Sprint 6 · Media & Security
+
+### Añadido
+
+- **`SlidingWindow`**: ventana deslizante de dos contadores. La ventana fija admitiría 120 peticiones al final de un minuto y 120 al principio del siguiente —240 en dos segundos—; esta variante lo impide con coste constante
+- **`RateLimiter`**: límites por identidad y por IP, con cabeceras `X-RateLimit-*` y `Retry-After`. Se aplica **después** de autenticar para que el contador se asocie a la identidad real y no solo a la IP, que es fácil de rotar. El endpoint de emisión limita **por IP y por usuario a la vez**: solo por IP, un ataque distribuido contra una cuenta pasa
+- **`IpResolver`**: `REMOTE_ADDR` es lo único fiable. `X-Forwarded-For` solo se lee si el administrador declara rangos de proxy de confianza; sin esa condición, cualquiera esquivaría el límite rotando la cabecera. La IP se almacena **hasheada** por ser dato personal
+- **`MimeValidator`**: valida por **contenido**, con `finfo` más `wp_check_filetype_and_ext`. Ni el `type` de `$_FILES`, ni la extensión, ni el `Content-Type` son fiables. **SVG queda fuera y sin opción en la interfaz**: es XML que admite `<script>`
+- **Límite de dimensiones** comprobado antes de procesar: un PNG enorme puede pesar poco comprimido y agotar la memoria al generar los tamaños derivados
+- **`MediaController`**: endpoint propio que delega en `wp_handle_upload()` y `wp_insert_attachment()`. Lo propio es la capa de política. Comprueba `edit_post` sobre el **post destino** — el punto que el controlador nativo no cubre — y lo hace **antes** de escribir nada
+- **`QuotaManager`**: cuotas de ficheros y bytes por usuario y ventana. Subida anónima imposible y no configurable
+- **`ExifCleaner`**: elimina la geolocalización por defecto. Publicar la foto con su GPS anularía la ocultación de `latitude` y `longitude` que hace la matriz de permisos
+- **`Deduplicator`**: reutiliza el adjunto existente ante reintentos de cliente por timeout
+- **`CorsHandler`**: CORS configurable con `Vary: Origin` siempre que el origen no sea `*` —sin él, una caché intermedia puede servir a un origen la cabecera de otro— y sin comodines de subdominio
+- **33 tests nuevos**: 17 unitarios y 16 de integración, centrados en lo que debe rechazarse
+
+### Notas técnicas
+
+- El entorno de tests necesita ahora las extensiones **GD** y **exif** además de las anteriores, para generar y analizar imágenes reales
+- El módulo de medios está **desactivado por defecto**: la subida es la superficie de ataque más peligrosa de una API
+- `phpcs` con el estándar WordPress: **0 errores**
+
 ## [0.6.0] - 2026-09-04 — Sprint 5 · Endpoints CRUD
 
 ### Añadido
