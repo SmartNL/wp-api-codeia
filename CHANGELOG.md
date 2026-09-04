@@ -5,6 +5,27 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.6.0] - 2026-09-04 — Sprint 5 · Endpoints CRUD
+
+### Añadido
+
+- **La API ya expone contenido.** Este sprint junta las tres capas anteriores: el esquema define las rutas, la autenticación resuelve la identidad y los permisos deciden el acceso
+- **`ResourceController`** sobre `WP_REST_Controller`: un solo controlador sirve a **todos** los recursos, parametrizado por su `ResourceDefinition`. No se genera una clase por post type
+- **Las rutas nacen con el `PermissionResolver` real.** No hubo `permission_callback` provisional en ningún momento — que era el riesgo que evitamos al reordenar los sprints
+- **Las operaciones no habilitadas no se registran**: responden `404`, no `403`. No revela qué operaciones existen pero están vetadas
+- **`QueryBuilder`**: traduce filtros con el `type` correcto en `meta_query`. Sin `NUMERIC`, MySQL compara `LONGTEXT` como cadena y `"300000" < "89000"` resulta verdadero. Todo identificador del cliente se traduce por lista blanca del esquema; si no traduce, se rechaza
+- **`FieldProjector`**: tres filtros en orden estricto — expuesto en configuración, visible para el rol, pedido con `_fields`. **`_fields` solo puede reducir, jamás ampliar**
+- **`CursorPaginator`**: paginación keyset sobre `(post_date_gmt, ID)`, firmada con HMAC. Coste constante a cualquier profundidad y estable ante inserciones
+- **`RouteRegistrar`**: registro diferido en `rest_api_init`. Una carga del front-end no paga el coste de construir definiciones
+- **`RewriteModule`**: alias en raíz opcional que reenvía al mismo `WP_REST_Server`, con `REST_REQUEST` definida antes del dispatch y `flush_rewrite_rules()` diferido
+- **`CollisionDetector`**: bloquea la activación del alias si el prefijo choca con una página, un post type, una taxonomía o un prefijo reservado
+- **37 tests nuevos**: 11 unitarios y 26 de integración sobre CRUD real con permisos aplicados
+
+### Corregido
+
+- **`CursorPaginator` no traducía el cursor a SQL.** Codificaba, decodificaba y dejaba el argumento en la consulta, pero nada lo consumía: la segunda página devolvía la primera otra vez. Añadido el filtro `posts_where` que genera la condición keyset. Lo detectó el test que comprueba que dos páginas consecutivas no comparten ningún ID
+- `per_page` no validaba su máximo: faltaba declarar `validate_callback` explícitamente, porque WordPress no lo añade solo a los args declarados a mano
+
 ## [0.5.0] - 2026-09-04 — Sprint 4 · Permissions & Utils
 
 ### Añadido
