@@ -2,7 +2,7 @@
 
 Roadmap de implementación en 8 sprints. Cada uno tiene su versión y su rama, y no se da por terminado hasta que su suite de tests está en verde.
 
-> **Estado actual:** `v0.7.0` — sprint 6 (Media & Security) implementado y verificado.
+> **Estado actual:** `v0.8.0` — sprint 7 (Swagger & Performance) implementado y verificado.
 
 ---
 
@@ -17,7 +17,7 @@ Roadmap de implementación en 8 sprints. Cada uno tiene su versión y su rama, y
 | 4 | Permissions & Utils ✅ | `v0.5.0` | **10** | 0 | **5** | **57** |
 | 5 | Endpoints CRUD ✅ | `v0.6.0` | **12** | 0 | **2** | **37** |
 | 6 | Media & Security ✅ | `v0.7.0` | **10** | 0 | **3** | **33** |
-| 7 | Swagger & Performance | `v0.8.0` | ~9 | 0 | ~7 | ~40 |
+| 7 | Swagger & Performance ✅ | `v0.8.0` | **8** | 0 | **3** | **41** |
 | 8 | Dashboard Admin | `v0.9.0` | ~16 | ~30 | ~9 | ~45 |
 | **Total** | | **`v0.9.0`** | **~105** | **~30** | **~56** | **~444** |
 

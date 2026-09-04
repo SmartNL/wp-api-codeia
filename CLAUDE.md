@@ -28,11 +28,11 @@ Roadmap completo, con el alcance y los tests de cada sprint, en [docs/planificac
 
 | | |
 | --- | --- |
-| Versión | `0.7.0` — sprint 6 (Media & Security) completo |
-| Rama actual | `sprint/06-media-security` |
-| Tests | 219 unitarios + 135 integración, en verde |
+| Versión | `0.8.0` — sprint 7 (Swagger & Performance) completo |
+| Rama actual | `sprint/07-swagger-performance` |
+| Tests | 245 unitarios + 150 integración, en verde |
 | `phpcs` | 0 errores (1 aviso, falso positivo de `prepare`) |
-| Siguiente sprint | **7 · Swagger & Performance** → `v0.8.0` |
+| Siguiente sprint | **8 · Dashboard Admin** → `v0.9.0` |
 | Remoto | [SmartNL/wp-api-codeia](https://github.com/SmartNL/wp-api-codeia) (privado) |
 
 ### Para retomar
