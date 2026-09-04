@@ -1,0 +1,31 @@
+# Dependencias
+/vendor/
+/node_modules/
+
+# Composer
+composer.lock
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build y tests
+/build/
+/dist/
+/coverage/
+.phpunit.result.cache
+
+# Entorno y secretos
+.env
+.env.local
+
+# Logs
+*.log
+debug.log
