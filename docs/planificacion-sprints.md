@@ -2,7 +2,7 @@
 
 Roadmap de implementación en 8 sprints. Cada uno tiene su versión y su rama, y no se da por terminado hasta que su suite de tests está en verde.
 
-> **Estado actual:** `v0.5.0` — sprint 4 (Permissions & Utils) implementado y verificado en `sprint/04-permissions-utils`. Sin commitear, a la espera del OK.
+> **Estado actual:** `v0.6.0` — sprint 5 (Endpoints CRUD) implementado y verificado. La API ya expone contenido.
 
 ---
 
@@ -15,7 +15,7 @@ Roadmap de implementación en 8 sprints. Cada uno tiene su versión y su rama, y
 | 2 | Schema Detection ✅ | `v0.3.0` | **16** | 0 | **5** | **54** |
 | 3 | Authentication ✅ | `v0.4.0` | **17** | 0 | **6** | **71** |
 | 4 | Permissions & Utils ✅ | `v0.5.0` | **10** | 0 | **5** | **57** |
-| 5 | Endpoints CRUD | `v0.6.0` | ~11 | 0 | ~9 | ~55 |
+| 5 | Endpoints CRUD ✅ | `v0.6.0` | **12** | 0 | **2** | **37** |
 | 6 | Media & Security | `v0.7.0` | ~10 | 0 | ~8 | ~50 |
 | 7 | Swagger & Performance | `v0.8.0` | ~9 | 0 | ~7 | ~40 |
 | 8 | Dashboard Admin | `v0.9.0` | ~16 | ~30 | ~9 | ~45 |
