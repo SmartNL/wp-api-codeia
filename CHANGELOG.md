@@ -5,6 +5,31 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.3.0] - 2026-09-04 — Sprint 2 · Schema Detection
+
+### Añadido
+
+- **Detección de esquema en cuatro niveles** (`src/Schema/`), el módulo del que derivan endpoints, permisos por campo y OpenAPI
+- **`FieldDefinition`**: modelo normalizado con `origin` y `confidence`. Sin trazabilidad de origen, un esquema equivocado es imposible de depurar
+- **`ExclusionList`**: descarta ruido por **lista explícita de claves del núcleo, nunca por el prefijo `_`**. En `flavor-real-estate` los 28 campos útiles llevan guion bajo inicial; filtrar por prefijo los eliminaría todos. Reconoce además los punteros `field_*` de ACF y colapsa claves indexadas de repetidor
+- **`TypeInferrer`**: infiere tipos de una muestra de hasta 50 valores, con los casos trampa documentados — `{0,1}` se propone booleano pero **marcado ambiguo** (puede ser un contador), y los numéricos con ceros a la izquierda y longitud fija se quedan en `string` para no destruir códigos postales
+- **`FieldNormalizer`**: traduce `_property_price` a `price` y resuelve colisiones. Los campos nativos (`id`, `title`, `status`…) siempre ganan; una clave que choque conserva su nombre completo y el conflicto queda registrado
+- **`ConflictResolver`**: fusiona por confianza y rellena huecos con los candidatos menores. Ante empate con tipos distintos aplica `string`, marca ambiguo y **deja el campo sin exponer** hasta que alguien decida
+- **Seis proveedores**: `NativeProvider` (nivel 1), `AcfProvider`, `MetaBoxProvider`, `JetEngineProvider` (nivel 2), `DbSampleProvider` (nivel 3) y `ManualProvider` (nivel 4). Cada adaptador de terceros se desactiva solo si su API no responde, sin impedir que el resto del esquema se construya
+- **`DbSampleProvider`**: consulta agregada sobre `wp_postmeta` acotada por post type. Propone relaciones exigiendo dos señales —sufijo `_id`/`_ids` y valores que resuelven a posts de un mismo tipo— y **nunca las activa sola**
+- **`SchemaCache`** y **`SchemaRegistry`**: caché con clave versionada por hash de entorno; la invalidación es implícita, sin depender de `wp_cache_flush_group()`
+- **33 tests nuevos**: 26 unitarios y 16 de integración contra un post type sembrado con `update_post_meta()` sin `register_meta()`, reproduciendo el caso real
+
+### Corregido
+
+- `SchemaRegistry::build()` declaraba `$object` pero el cuerpo usaba `$type_object`. El operador `??` enmascaraba el fallo y `label` caía en silencio al slug del post type en vez de a su etiqueta. Detectado por `phpcs` antes de volver a ejecutar los tests
+
+### Notas técnicas
+
+- `phpcs` con el estándar WordPress: **0 errores**
+- Las consultas directas de `DbSampleProvider` están justificadas en el ruleset: descubrir qué claves existen es su razón de ser y WordPress no ofrece API para ello
+- Los tests unitarios replican `is_serialized`, `maybe_unserialize` e `is_protected_meta` con su comportamiento real. Un stub que devolviera siempre `false` ocultaría justo los casos que `TypeInferrer` debe distinguir
+
 ## [0.2.0] - 2026-09-04 — Sprint 1 · Foundation
 
 ### Añadido

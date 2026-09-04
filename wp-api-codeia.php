@@ -3,7 +3,7 @@
  * Plugin Name:       WP API Codeia
  * Plugin URI:        https://sn4p.dev/wp-api-codeia
  * Description:       Convierte WordPress en una API personalizada configurable desde un dashboard propio.
- * Version:           0.2.0
+ * Version:           0.3.0
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            sn4p.dev
@@ -20,7 +20,7 @@ declare( strict_types=1 );
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'CODEIA_VERSION', '0.2.0' );
+define( 'CODEIA_VERSION', '0.3.0' );
 define( 'CODEIA_MIN_PHP', '8.0' );
 define( 'CODEIA_MIN_WP', '7.1' );
 define( 'CODEIA_PLUGIN_FILE', __FILE__ );
@@ -115,7 +115,13 @@ function codeia_bootstrap(): void {
 	register_activation_hook( CODEIA_PLUGIN_FILE, array( WpApi\Codeia\Core\Activator::class, 'activate' ) );
 	register_deactivation_hook( CODEIA_PLUGIN_FILE, array( WpApi\Codeia\Core\Activator::class, 'deactivate' ) );
 
-	( new WpApi\Codeia\Plugin( new WpApi\Codeia\Container() ) )->boot();
+	$codeia_plugin = new WpApi\Codeia\Plugin( new WpApi\Codeia\Container() );
+
+	// Modulos del plugin. Declarar un proveedor no construye nada: la
+	// resolucion en el contenedor es perezosa.
+	$codeia_plugin->add_provider( new WpApi\Codeia\Schema\SchemaServiceProvider() );
+
+	$codeia_plugin->boot();
 }
 
 codeia_bootstrap();
