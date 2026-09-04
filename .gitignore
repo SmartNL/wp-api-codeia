@@ -5,6 +5,9 @@ node_modules/
 # Caché de Vite
 admin-ui/.vite/
 
+# Configuración local que sobrescribe wp-tests-config.php
+wp-tests-config.local.php
+
 # NOTA: assets/admin/ NO se ignora. Es la salida del build del dashboard
 # y se versiona para que el plugin funcione desde un clon o zip sin Node.
 

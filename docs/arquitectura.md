@@ -178,7 +178,8 @@ wp-api-codeia/
 
 | Directorio | Responsabilidad | Ejemplos de contenido |
 | ---------- | --------------- | --------------------- |
-| `Core/` | Arranque e infraestructura transversal. No conoce el dominio. | Contenedor DI, service providers, `Config`, `CacheManager`, `Logger`, `EventBus`, activación/desactivación |
+| *(raíz de `src/`)* | Arranque: el contenedor y el orquestador. | `Container`, `Plugin` |
+| `Core/` | Infraestructura transversal. No conoce el dominio. | `ServiceProvider`, `Config`, `Cache/` (interfaz y 3 drivers), `Logger`, `EventDispatcher`, `Activator`, `Exceptions/` |
 | `Modules/` | Unidades funcionales activables. Cada una se registra en el contenedor y puede apagarse desde el dashboard. | `AuthModule`, `RestModule`, `OpenApiModule`, `MediaModule` |
 | `Api/` | Todo lo que toca HTTP: rutas, controladores, formato de respuesta y error. | `RouteRegistrar`, `ControllerFactory`, `ResourceController`, `MediaController`, `ResponseFormatter` |
 | `Auth/` | Resolución de identidad y ciclo de vida de credenciales. | `AuthenticatorChain`, `JwtAuthenticator`, `ApiKeyAuthenticator`, `TokenRepository` |
@@ -253,7 +254,7 @@ El plugin se extiende con los mecanismos nativos de WordPress —`do_action` y `
 codeia/<subsistema>/<evento>
 ```
 
-`EventBus` es una fachada delgada sobre esos hooks: centraliza el prefijo, documenta la firma de cada evento y permite instrumentar (medir, registrar) sin tocar los puntos de emisión. No sustituye a los hooks de WordPress; los envuelve, de modo que cualquier desarrollador puede seguir usando `add_filter()` directamente.
+`EventDispatcher` es una fachada delgada sobre esos hooks: centraliza el prefijo, documenta la firma de cada evento y permite instrumentar (medir, registrar) sin tocar los puntos de emisión. No sustituye a los hooks de WordPress; los envuelve, de modo que cualquier desarrollador puede seguir usando `add_filter()` directamente.
 
 ### 6.1 Catálogo inicial de puntos de extensión **(propuesto)**
 
