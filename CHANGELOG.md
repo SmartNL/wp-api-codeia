@@ -5,6 +5,29 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.9.0] - 2026-09-04 — Sprint 8 · Dashboard Admin
+
+### Añadido
+
+- **`Menu`**: siete pantallas —Estado, Recursos, Permisos, Autenticación, Documentación, Registros y Herramientas—, todas con `manage_options`. No se contempla un rol intermedio: quien configura qué datos salen del sitio toma decisiones de administración plenas
+- **`InternalRestController`**: rutas `admin/` que consume el cliente React. Es la **única** vía de datos — sin `admin-ajax` ni estado preinyectado más allá de la configuración de arranque —, así que la interfaz se puede ejercitar con `curl` durante el desarrollo. No aparecen en el documento OpenAPI
+- **`Sanitizer`**: única puerta de escritura. Fusiona el fragmento con lo existente, **descarta claves desconocidas**, y filtra post types y roles que no existen en la instalación
+- **`StatusChecker`**: diagnóstico con semáforo de object cache, enlaces permanentes, HTTPS, versión de PHP, registro, proveedores y coherencia de los límites de subida
+- **`ConfigExporter`**: formato portable con `format_version` **independiente de la versión del plugin**, y comparación con el entorno de destino que detecta post types y roles ausentes. **Nunca incluye secretos**
+- **`AssetLoader`**: encola por `screen_id`, no en todo el admin. Inyecta `window.codeiaAdmin` con posición `before` — con React montándose al cargar, hacerlo después dejaría la aplicación sin `root` ni `nonce` en su primer render
+- **`admin-ui/`**: React 18 + Vite con **React externalizado a `wp-element`**. Empaquetarlo añadiría ~130 KB y arriesgaría dos instancias en la misma página, con los errores de contexto y hooks que eso provoca
+- **La matriz desactiva las celdas que las capabilities ya impiden**, en vez de permitir marcar algo que la segunda puerta rechazaría siempre
+- **25 tests nuevos**: 19 de integración PHP y 6 de JavaScript con Vitest
+
+### Corregido
+
+- `AssetLoader` encolaba `index.css` incondicionalmente, pero el bundle solo lo genera si hay estilos: producía un 404 en cada carga de la pantalla. Ahora se comprueba su existencia
+
+### Notas técnicas
+
+- Los assets construidos en `assets/admin/` **se versionan**, para que el plugin funcione desde un clon o un zip sin Node. La salida usa nombre estable, sin hash por build, para que los diffs sigan siendo legibles
+- `phpcs` con el estándar WordPress: **0 errores**
+
 ## [0.8.0] - 2026-09-04 — Sprint 7 · Swagger & Performance
 
 ### Añadido
