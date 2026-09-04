@@ -10,7 +10,7 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 indent_style = tab
 
-[*.{php,js,css,scss}]
+[*.{php,js,jsx,ts,tsx,mjs,cjs,css,scss}]
 indent_style = tab
 
 [*.{yml,yaml,json,md}]

@@ -10,6 +10,8 @@ La premisa que lo diferencia de escribir endpoints a mano: **el esquema no se de
 
 - **WordPress**: 7.1 o superior
 - **PHP**: 8.0 o superior
+- **Composer**: autoloading PSR-4
+- **Node.js**: solo para desarrollar el dashboard React — no hace falta para usar el plugin
 
 ## Instalación
 
@@ -88,10 +90,25 @@ Diseño técnico completo en [docs/](docs/). Empieza por el documento principal:
 
 ## Desarrollo
 
+> Los comandos siguientes describen el flujo previsto. **Todavía no son ejecutables**: no existe `composer.json` ni `admin-ui/`.
+
+```bash
+composer install
+
+cd admin-ui && npm install
+npm run dev            # desarrollo con HMR
+npm run build          # producción → assets/admin/
+
+./vendor/bin/phpunit
+./vendor/bin/phpcs --standard=WordPress src/
+```
+
 - El código seguirá los [WordPress Coding Standards](https://developer.wordpress.org/coding-standards/php/).
 - [.editorconfig](.editorconfig) aplica tabuladores en PHP/JS/CSS y finales de línea `LF`. Activa el soporte de EditorConfig en tu editor.
 - Namespace PHP `WpApi\Codeia` con autoloading PSR-4 sobre `src/`.
+- El dashboard usa React 18 + Vite sobre `@wordpress/components`, con React externalizado a `wp-element`. Los assets construidos en `assets/admin/` se versionan, para que el plugin funcione desde un clon sin Node.
 - Cada ruta REST declara un `permission_callback` explícito. Nunca `'__return_true'`.
+- [CLAUDE.md](CLAUDE.md) reúne el contexto del proyecto y las reglas no obvias del diseño.
 
 ## Changelog
 

@@ -153,7 +153,10 @@ wp-api-codeia/
 ├── uninstall.php              → Borrado de opciones y tablas propias
 ├── composer.json              → PSR-4: WpApi\Codeia\ → src/
 ├── docs/                      → Esta documentación (Markdown)
-├── assets/                    → CSS/JS del dashboard, Swagger UI local
+├── admin-ui/                  → Fuente React del dashboard (NO se distribuye)
+├── assets/
+│   ├── admin/                 → Salida del build de Vite (SÍ se versiona)
+│   └── vendor/swagger-ui/     → Swagger UI servida localmente
 ├── languages/                 → Traducciones
 └── src/                       → Todo el código PHP, PSR-4
     ├── Core/
@@ -167,7 +170,9 @@ wp-api-codeia/
     └── Utils/
 ```
 
-> **Nota sobre el nombre `OpenApi/`.** El módulo de generación de Swagger se llamaría naturalmente `Docs/`, pero `docs/` en la raíz ya es la documentación Markdown del proyecto. En sistemas de archivos insensibles a mayúsculas —Windows y macOS por defecto, que es donde se desarrolla esto— `Docs/` y `docs/` colisionan. Se renombra a `OpenApi/`, que además describe mejor su contenido. Todo el código PHP vive bajo `src/` por la misma razón: aísla el espacio de nombres del proyecto del de la documentación y los assets.
+> **Nota sobre el nombre `OpenApi/`.** El módulo de generación de Swagger se llamaría naturalmente `Docs/`. Se elige `OpenApi/` por dos razones, ambas de legibilidad: describe qué produce el módulo —un documento OpenAPI— en lugar de nombrar una categoría vaga, y evita que «docs» signifique dos cosas distintas en el mismo repositorio, donde `docs/` ya es la documentación Markdown del proyecto.
+>
+> No hay impedimento técnico: `src/Docs/` y `docs/` están en directorios distintos y **no colisionan**, tampoco en Windows o macOS, cuya insensibilidad a mayúsculas solo afecta a entradas de un mismo directorio. Todo el código PHP vive bajo `src/` por convención PSR-4, no para evitar ese choque.
 
 ### 4.1 Responsabilidad de cada directorio
 
@@ -180,7 +185,7 @@ wp-api-codeia/
 | `Schema/` | Descubrimiento, normalización y caché del modelo de datos. El corazón del plugin. | `SchemaRegistry`, `FieldProvider` y adaptadores, `FieldNormalizer`, `SchemaCache` |
 | `Permissions/` | Evaluación de acceso por rol, recurso, operación y campo. | `PermissionResolver`, `PermissionMatrix`, `FieldVisibility`, `CapabilityMapper` |
 | `OpenApi/` | Traducción del esquema a OpenAPI 3.1 y servicio de la UI. | `SpecGenerator`, `SchemaMapper`, `SecuritySchemeBuilder`, `SwaggerUiPage` |
-| `Admin/` | Dashboard: pantallas, settings, assets, endpoints internos de la UI. | `Menu`, páginas por sección, `SettingsRegistrar`, `InternalRestController` |
+| `Admin/` | Dashboard: pantallas, settings, endpoints internos y encolado del bundle React de `assets/admin/`. | `Menu`, páginas por sección, `SettingsRegistrar`, `InternalRestController`, `AssetLoader` |
 | `Utils/` | Funciones puras sin estado ni dependencias. | `Str`, `Arr`, `MimeGuesser`, `Hash` |
 
 Criterio para decidir dónde va algo nuevo: **si necesita saber qué es un "recurso expuesto", no es `Core/` ni `Utils/`.**
@@ -376,6 +381,8 @@ Migraciones idempotentes ejecutadas al detectar una `version` inferior a la del 
 | Tablas | `{$wpdb->prefix}codeia_` | `wp_codeia_logs` |
 
 Requisitos técnicos: **WordPress 7.1+**, **PHP 8.0+**, PSR-4, text domain `wp-api-codeia`. Todo archivo PHP abre con `defined( 'ABSPATH' ) || exit;`.
+
+El dashboard se construye con **React 18 + Vite** sobre `@wordpress/components`, con React externalizado a `wp-element`. Detalle del reparto entre Settings API y React, y del proceso de build, en [08-dashboard-admin.md](08-dashboard-admin.md).
 
 ---
 

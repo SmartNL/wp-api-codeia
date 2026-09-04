@@ -1,6 +1,12 @@
 # Dependencias
 /vendor/
-/node_modules/
+node_modules/
+
+# Caché de Vite
+admin-ui/.vite/
+
+# NOTA: assets/admin/ NO se ignora. Es la salida del build del dashboard
+# y se versiona para que el plugin funcione desde un clon o zip sin Node.
 
 # Composer
 composer.lock

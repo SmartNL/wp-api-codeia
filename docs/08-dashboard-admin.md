@@ -114,12 +114,18 @@ Dos requisitos de la interfaz que evitan configuraciones incoherentes:
 
 | Mecanismo | Se usa en | Por qué |
 | --------- | --------- | ------- |
-| **Settings API** | Autenticación, Herramientas, opciones globales | Formularios que se envían enteros. Sanitización, nonces y `admin_notices` gratis |
-| **REST interno + JS** | Recursos, Permisos, Estado, Registros | Estado grande que cambia por celdas; recargar la página en cada casilla es inviable |
+| **Settings API** (PHP) | Autenticación, Herramientas, opciones globales | Formularios que se envían enteros. Sanitización, nonces y `admin_notices` gratis |
+| **React 18 + REST interno** | Recursos, Permisos, Estado, Registros | Estado grande que cambia por celdas; recargar la página en cada casilla es inviable |
 
-El criterio: **si la pantalla es un formulario que se guarda de una vez, Settings API. Si es una tabla con estado que se edita celda a celda, REST interno.**
+El criterio: **si la pantalla es un formulario que se guarda de una vez, Settings API. Si es una tabla con estado que se edita celda a celda, React contra las rutas REST internas.**
 
-No se mezclan en la misma pantalla. Una pantalla híbrida —parte Settings API, parte AJAX— tiene dos caminos de guardado, dos de validación y dos de manejo de errores, con la incoherencia garantizada a medio plazo.
+No se mezclan en la misma pantalla. Una pantalla híbrida —parte Settings API, parte cliente JS— tiene dos caminos de guardado, dos de validación y dos de manejo de errores, con la incoherencia garantizada a medio plazo.
+
+**Por qué React y no JS sin framework.** Las dos pantallas complejas lo justifican por sí solas: la matriz de permisos es una tabla de cuatro ejes con estado derivado (marcar `read` habilita opciones de campo, las capabilities inexistentes desactivan celdas) y el catálogo de recursos son ~30 filas por recurso con edición en línea, validación y conflictos. Mantener eso con manipulación directa del DOM es donde ese enfoque deja de compensar.
+
+El coste es real y se asume: un paso de build y una dependencia de Node en desarrollo. Se acota a las cuatro pantallas que lo necesitan — el resto del plugin, y la API entera, funcionan sin JavaScript.
+
+Se usa `@wordpress/components` para heredar el aspecto del administrador sin reconstruirlo. El plugin **no** carga React por su cuenta: se declaran `wp-element` y `wp-components` como dependencias del script, reutilizando lo que WordPress ya sirve.
 
 ### 5.2 Settings API
 
@@ -168,6 +174,8 @@ Todas con:
 
 Estas rutas **no aparecen en el documento OpenAPI**: están marcadas como internas y el generador las omite. Documentar la superficie de administración de la API no aporta nada a quien la integra y sí a quien la ataca.
 
+Son la única API que consume el cliente React: no hay `admin-ajax.php`, ni variables preinyectadas con el estado inicial más allá de la configuración de arranque del §5.4. La interfaz carga sus datos igual que lo haría un cliente externo, lo que permite ejercitarla con `curl` durante el desarrollo sin abrir el navegador.
+
 ### 5.4 Nonces
 
 Las rutas `admin/` se consumen por cookie desde el navegador del administrador, así que sí requieren nonce — a diferencia de las rutas públicas autenticadas por token ([01 §2.2](01-autenticacion.md)).
@@ -185,6 +193,42 @@ wp_add_inline_script( 'codeia-admin', sprintf(
 El cliente lo envía en `X-WP-Nonce` y `rest_cookie_check_errors` lo verifica. Los formularios de Settings API usan su propio nonce a través de `settings_fields()`.
 
 Los nonces caducan (12–24 h). Una pestaña abierta toda la noche fallará al guardar; la interfaz detecta `rest_cookie_invalid_nonce` y **avisa de que hay que recargar**, en lugar de mostrar un error genérico.
+
+El `wp_add_inline_script` va con posición `'before'` para que `window.codeiaAdmin` exista antes de que el bundle se evalúe. Con React montándose al cargar, inyectarlo después deja la aplicación sin `root` ni `nonce` en su primer render.
+
+### 5.5 Build del dashboard
+
+| | |
+| --- | --- |
+| Fuente | `admin-ui/` — **no se distribuye** con el plugin |
+| Salida | `assets/admin/` — **se versiona en git** |
+| Herramienta | Vite |
+| Dependencias externalizadas | `wp-element`, `wp-components`, `wp-i18n` |
+
+```bash
+cd admin-ui
+npm install
+npm run dev      # desarrollo con HMR
+npm run build    # producción → assets/admin/
+```
+
+**Los assets construidos se commitean.** Es la diferencia entre un plugin que se instala clonando el repositorio o descomprimiendo un zip, y uno que exige Node en el servidor de destino. El coste son diffs ruidosos en los ficheros generados; se acota configurando una salida con nombre estable, sin hash por build.
+
+React no se empaqueta en el bundle. WordPress ya sirve `wp-element` (su envoltorio sobre React) y `wp-components`; se declaran como dependencias del script y Vite los marca como externos:
+
+```js
+// vite.config.js
+build: {
+  rollupOptions: {
+    external: [ '@wordpress/element', '@wordpress/components', '@wordpress/i18n' ],
+    output: { globals: { '@wordpress/element': 'wp.element' } },
+  },
+},
+```
+
+Duplicar React en el bundle añadiría ~130 KB y arriesgaría dos instancias distintas en la misma página, con los errores de contexto y hooks que eso provoca cuando otro plugin monta su propia interfaz.
+
+Los scripts se encolan comprobando `$screen->id`, no en todo `admin_enqueue_scripts` ([10-rendimiento.md §5](10-rendimiento.md)).
 
 ---
 
@@ -274,6 +318,10 @@ El **rebuild se ejecuta por lotes vía REST** con barra de progreso, no en una s
 - [ ] Rebuild por lotes con progreso
 - [ ] Casillas desactivadas cuando las capabilities ya lo impiden
 - [ ] Toda salida escapada (`esc_html`, `esc_attr`, `wp_json_encode`)
+- [ ] React externalizado a `wp-element`; sin React empaquetado en el bundle
+- [ ] `window.codeiaAdmin` inyectado con posición `'before'`
+- [ ] Assets de `assets/admin/` versionados y al día con `admin-ui/`
+- [ ] Scripts encolados por `$screen->id`, no en todo el admin
 
 ---
 

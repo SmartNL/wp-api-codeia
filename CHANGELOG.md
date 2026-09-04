@@ -23,6 +23,18 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
   - `10-rendimiento.md` — jerarquía de caché en tres niveles, claves versionadas, protección contra estampida, presupuesto por petición y antipatrones
   - `11-escalabilidad.md` — multisitio, exportación e importación versionada, política de deprecación, CORS y camino hacia un panel externo
 
+- **`CLAUDE.md`**: contexto para agentes de código — estado real del proyecto, comandos previstos, arquitectura condensada y las reglas no obvias del diseño que se romperían aplicando el enfoque por defecto
+
+### Cambiado
+
+- **Stack del dashboard**: `08-dashboard-admin.md` pasa de «REST interno + JS sin framework» a **React 18 + Vite** sobre `@wordpress/components`, con React externalizado a `wp-element`. Se añade la sección de build (`admin-ui/` → `assets/admin/`, assets construidos versionados)
+- `.gitignore`: `/node_modules/` → `node_modules/` sin anclar, para que cubra `admin-ui/node_modules/`
+- `.editorconfig`: la regla de tabuladores incluye `jsx`, `ts`, `tsx`, `mjs` y `cjs`
+
+### Corregido
+
+- **`arquitectura.md`**: la nota que justificaba el nombre `OpenApi/` afirmaba que `src/Docs/` colisionaría con `docs/` en sistemas de archivos insensibles a mayúsculas. Es falso — están en directorios distintos y la insensibilidad solo afecta a entradas de un mismo directorio. El nombre se mantiene por ser más descriptivo, con la justificación reescrita
+
 ### Decisiones de diseño registradas
 
 - **Namespace REST configurable**, con `codeia/v1` por defecto
@@ -30,6 +42,7 @@ y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 - **Detección de campos multi-nivel**: la introspección nativa no basta. Verificado contra el plugin `flavor-real-estate` de esta instalación, que guarda sus ~28 campos con `update_post_meta()` sin `register_meta()`, por lo que son invisibles a `get_registered_meta_keys()`
 - **Exclusión de claves meta por lista explícita, no por prefijo `_`**: en ese mismo plugin todos los campos útiles usan guion bajo inicial, así que filtrar por prefijo los descartaría todos
 - **Denegación por defecto** en permisos, campos, operaciones y módulos
+- **Dashboard con React 18 + Vite**, acotado a las cuatro pantallas con estado complejo (Recursos, Permisos, Estado, Registros); el resto usa Settings API y la API funciona sin JavaScript
 - **Código bajo `src/`** y módulo de OpenAPI llamado `OpenApi/` en vez de `Docs/`, para no colisionar con `docs/` en sistemas de archivos insensibles a mayúsculas
 
 _Sin código de plugin todavía. La primera versión publicada será la `0.1.0`._
