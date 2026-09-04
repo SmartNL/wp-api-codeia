@@ -5,6 +5,24 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.8.0] - 2026-09-04 — Sprint 7 · Swagger & Performance
+
+### Añadido
+
+- **`SpecGenerator`**: documento OpenAPI 3.1 derivado de los **mismos objetos que producen las rutas**. Que ambos salgan del mismo sitio es lo que impide la deriva entre documentación e implementación; la alternativa habitual —anotaciones o YAML aparte— envejece en cuanto alguien cambia la configuración
+- **El documento varía por ámbito de permisos.** Uno único con todos los campos filtraría la existencia de `cadastral_ref` a un consumidor anónimo: el **nombre** de un campo ya es información
+- **Tres esquemas por recurso**, no uno: lectura, creación y actualización. Uno compartido produce clientes generados que envían `id` en el `POST` o consideran obligatorio en escritura lo que solo aparece en lectura
+- **`SchemaMapper`**: conversión draft-04 → 2020-12. No es cosmética — `exclusiveMinimum` es un booleano junto a `minimum` en draft-04 y el propio valor en 2020-12; traducirlo mal cambia la semántica del límite
+- **`SecuritySchemeBuilder`**: declara solo los proveedores **activos**. Documentar JWT desactivado invita a integrar contra algo que devolverá 401
+- **`StampedeLock`**: reserva con `add()`, que solo tiene éxito si la clave no existe y por eso es atómico. Quien no obtiene el cerrojo sirve la versión obsoleta en lugar de reconstruir en paralelo
+- **`EtagManager`**: `ETag` e `If-None-Match` con soporte de forma débil. Convierte una respuesta de 200 KB en unas cabeceras cuando nada ha cambiado
+- **`DocsController`**: endpoint `/docs` **privado por defecto**. Un documento OpenAPI es un mapa completo de la superficie de ataque; publicarlo debe ser deliberado. Con modo no público emite `Cache-Control: private, no-store`
+- **41 tests nuevos**: 26 unitarios y 15 de integración, incluida la verificación de que toda referencia `$ref` resuelve y no hay `operationId` duplicados
+
+### Notas técnicas
+
+- `phpcs` con el estándar WordPress: **0 errores**
+
 ## [0.7.0] - 2026-09-04 — Sprint 6 · Media & Security
 
 ### Añadido
