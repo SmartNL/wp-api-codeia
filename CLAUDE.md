@@ -28,11 +28,11 @@ Roadmap completo, con el alcance y los tests de cada sprint, en [docs/planificac
 
 | | |
 | --- | --- |
-| Versión | `0.8.0` — sprint 7 (Swagger & Performance) completo |
-| Rama actual | `sprint/07-swagger-performance` |
-| Tests | 245 unitarios + 150 integración, en verde |
+| Versión | `0.9.0` — los 8 sprints completos |
+| Rama actual | `sprint/08-dashboard-admin` |
+| Tests | 245 unitarios + 169 integración + 6 JS, en verde |
 | `phpcs` | 0 errores (1 aviso, falso positivo de `prepare`) |
-| Siguiente sprint | **8 · Dashboard Admin** → `v0.9.0` |
+| Siguiente hito | **v1.0.0** — merge de `development` a `main` |
 | Remoto | [SmartNL/wp-api-codeia](https://github.com/SmartNL/wp-api-codeia) (privado) |
 
 ### Para retomar
