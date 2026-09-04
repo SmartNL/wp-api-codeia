@@ -28,15 +28,15 @@ Roadmap completo, con el alcance y los tests de cada sprint, en [docs/planificac
 
 | | |
 | --- | --- |
-| Versión | `0.2.0` — sprint 1 (Foundation) completo |
-| Rama actual | `sprint/01-foundation` |
-| Tests | 55 unitarios + 17 integración, en verde |
-| `phpcs` | 0 errores, 0 avisos |
-| Siguiente sprint | **2 · Schema Detection** → `v0.3.0` |
+| Versión | `0.3.0` — sprint 2 (Schema Detection) completo |
+| Rama actual | `sprint/02-schema-detection` |
+| Tests | 123 unitarios + 33 integración, en verde |
+| `phpcs` | 0 errores (1 aviso, falso positivo de `prepare`) |
+| Siguiente sprint | **3 · Authentication** → `v0.4.0` |
 | Remoto | [SmartNL/wp-api-codeia](https://github.com/SmartNL/wp-api-codeia) (privado) |
 
-**Existe ya:** entry point, `Container`, `Plugin`, `Config`, caché en dos niveles, `Logger`, `EventDispatcher`, `Activator`, `uninstall.php` e infraestructura de tests.
-**No existe todavía:** `src/Schema/`, `src/Auth/`, `src/Permissions/`, `src/Api/`, `src/Media/`, `src/Security/`, `src/OpenApi/`, `src/Admin/`, `src/Modules/`, `src/Rewrite/`, `src/Utils/` ni `admin-ui/`. De los 12 documentos de arquitectura solo 1 está implementado.
+**Existe ya:** entry point, `Container`, `Plugin`, `Config`, caché en dos niveles, `Logger`, `EventDispatcher`, `Activator`, `uninstall.php`, todo `src/Schema/` (detección en 4 niveles con 6 proveedores) e infraestructura de tests.
+**No existe todavía:** `src/Auth/`, `src/Permissions/`, `src/Api/`, `src/Media/`, `src/Security/`, `src/OpenApi/`, `src/Admin/`, `src/Modules/`, `src/Rewrite/`, `src/Utils/` ni `admin-ui/`. De los 12 documentos de arquitectura hay 2 implementados.
 
 ### Entorno de desarrollo en esta máquina
 
@@ -61,8 +61,8 @@ export PHPRC="/ruta/al/directorio/del/php.ini"
 PHP="/c/Users/le/AppData/Roaming/Local/lightning-services/php-8.2.29+0/bin/win64/php.exe"
 export CODEIA_TEST_PHP_BINARY="$PHP"
 
-"$PHP" vendor/phpunit/phpunit/phpunit --testsuite unit          # 55 tests, ~0.5s
-"$PHP" vendor/phpunit/phpunit/phpunit --testsuite integration   # 17 tests, ~0.8s
+"$PHP" vendor/phpunit/phpunit/phpunit --testsuite unit          # 123 tests, ~0.7s
+"$PHP" vendor/phpunit/phpunit/phpunit --testsuite integration   # 33 tests, ~2.6s
 "$PHP" vendor/squizlabs/php_codesniffer/bin/phpcs               # WPCS
 ```
 

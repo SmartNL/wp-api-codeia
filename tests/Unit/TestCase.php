@@ -50,8 +50,61 @@ abstract class TestCase extends PhpUnitTestCase {
 		Functions\when( 'wp_json_encode' )->alias(
 			static fn ( $data, int $flags = 0 ): string|false => json_encode( $data, $flags )
 		);
-	}
 
+		// is_serialized y maybe_unserialize son funciones de WordPress, no de
+		// PHP. Sin ellas, pasar 'is_serialized' como callable falla con
+		// TypeError antes siquiera de ejecutarse. Se replica su comportamiento
+		// real: un stub que devolviera siempre false ocultaria justo los casos
+		// que TypeInferrer tiene que distinguir.
+		Functions\when( 'is_serialized' )->alias(
+			static function ( $data ): bool {
+
+				if ( ! is_string( $data ) ) {
+					return false;
+				}
+
+				$data = trim( $data );
+
+				if ( 'N;' === $data ) {
+					return true;
+				}
+
+				if ( strlen( $data ) < 4 || ':' !== $data[1] ) {
+					return false;
+				}
+
+				$token = $data[0];
+
+				if ( in_array( $token, array( 'a', 'O', 's' ), true ) ) {
+					return 1 === preg_match( "/^{$token}:[0-9]+:/s", $data );
+				}
+
+				if ( in_array( $token, array( 'b', 'i', 'd' ), true ) ) {
+					return 1 === preg_match( "/^{$token}:[0-9.E+-]+;/", $data );
+				}
+
+				return false;
+			}
+		);
+
+		Functions\when( 'maybe_unserialize' )->alias(
+			static function ( $data ) {
+
+				if ( is_string( $data ) && is_serialized( $data ) ) {
+					return unserialize( trim( $data ) );
+				}
+
+				return $data;
+			}
+		);
+
+		Functions\when( 'is_protected_meta' )->alias(
+			static function ( string $key ): bool {
+
+				return str_starts_with( $key, '_' );
+			}
+		);
+	}
 	/**
 	 * Limpia el mockeo.
 	 */
