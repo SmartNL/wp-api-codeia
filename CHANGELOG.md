@@ -5,6 +5,32 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.4.0] - 2026-09-04 — Sprint 3 · Authentication
+
+### Añadido
+
+- **Cadena de autenticación conmutable** (`src/Auth/`) con cuatro proveedores activos y OAuth2 preparado como extensión futura
+- **`JwtCodec`**: emisión y verificación HS256. El algoritmo se **compara contra el esperado, nunca se lee del token** para decidir cómo verificar, lo que cierra `alg: none` y la confusión HS/RS. Valida en orden formato → algoritmo → firma → claims, para que un error de claim no sirva de oráculo sobre tokens sin firmar
+- **`AuthenticatorChain`**: separa `handles()` de `authenticate()`, distinguiendo «no traes credenciales mías» de «traes las mías y son inválidas». Sin esa distinción, un token caducado caería al siguiente proveedor y acabaría en un 403 confuso en vez de un 401
+- **`RefreshTokenService`**: rotación con familias y **detección de reutilización**. Un refresh ya consumido que reaparece solo se explica por carrera del cliente o por robo; como no se distinguen, cae la familia entera
+- **`TokenVersion`**: revocación masiva con un entero en user meta. Cambiar contraseña o rol la incrementa e invalida todos los tokens previos con una sola escritura
+- **`RevocationList`**: revocación individual por `jti`, acotada por la vigencia del token y no por el histórico
+- **`TokenRepository`** y **`OpaqueToken`**: API Keys y tokens de usuario almacenados solo como hash SHA-256, comparados con `hash_equals`. El alfabeto excluye el punto para poder distinguirlos de un JWT en el esquema Bearer
+- **`AuthMiddleware`**: engancha en `determine_current_user` a prioridad 15 —por encima de la cookie, por debajo de Application Passwords— con guarda de reentrada. Devuelve `true` en `rest_authentication_errors` **solo tras autenticar**; hacerlo siempre desactivaría la protección CSRF de toda la instalación
+- **`AuthController`**: `/auth/token` y `/auth/refresh`. Mensaje idéntico para usuario inexistente y contraseña incorrecta, para no convertir el endpoint en un oráculo de enumeración
+- **71 tests nuevos**: 39 unitarios y 32 de integración
+
+### Corregido
+
+- **`Logger` degrada en silencio si su tabla no existe.** Antes emitía el error de base de datos de WordPress directamente en la salida, corrompiendo cualquier respuesta JSON. Ahora suprime el error, marca el registro como no disponible para el resto de la petición y deja de reintentar
+
+### Notas técnicas
+
+- Los endpoints de auth son públicos por necesidad, pero **no usan `__return_true`**: su `permission_callback` exige transporte cifrado y rechaza la emisión sobre HTTP
+- El secreto de firma nunca reutiliza `AUTH_KEY` ni las sales del núcleo: comparten propósito con las cookies de sesión, y compartirlo convertiría la fuga de uno en el compromiso de ambos
+- Las credenciales opacas usan SHA-256 y no `wp_hash_password()`: 256 bits de entropía aleatoria no necesitan el coste de bcrypt, cuyo propósito es frenar ataques de diccionario contra contraseñas humanas
+- `phpcs` con el estándar WordPress: **0 errores**
+
 ## [0.3.0] - 2026-09-04 — Sprint 2 · Schema Detection
 
 ### Añadido
