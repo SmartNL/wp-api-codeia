@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<ruleset name="WP API Codeia">
+
+	<description>WordPress Coding Standards adaptados a un plugin PSR-4.</description>
+
+	<file>src</file>
+	<file>tests</file>
+	<file>wp-api-codeia.php</file>
+	<file>uninstall.php</file>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+	<arg name="parallel" value="8"/>
+
+	<rule ref="WordPress">
+		<!--
+			PSR-4 exige que el nombre del archivo coincida con el de la clase
+			(Container.php). WPCS espera el formato del nucleo (class-container.php).
+			Son incompatibles: el autoloader manda.
+		-->
+		<exclude name="WordPress.Files.FileName"/>
+
+		<!--
+			El plugin usa namespaces reales, no prefijos en los nombres de clase.
+			El aislamiento lo da WpApi\Codeia\, no un prefijo global.
+		-->
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals"/>
+
+		<!--
+			Los mensajes de excepcion van al log y al manejador de errores, no
+			al navegador. Escaparlos con esc_html() corromperia el mensaje sin
+			ganar nada: quien lo renderice es responsable de escaparlo alli.
+		-->
+		<exclude name="WordPress.Security.EscapeOutput.ExceptionNotEscaped"/>
+	</rule>
+
+	<!--
+		Los tests corren solo por CLI: no reciben peticiones HTTP, no renderizan
+		a un navegador y necesitan manipular globales como $wpdb para aislar el
+		codigo bajo prueba. Aplicarles estos sniffs solo produce ruido.
+	-->
+	<rule ref="WordPress.Security.ValidatedSanitizedInput">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.Security.EscapeOutput">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.WP.GlobalVariablesOverride">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.VariableComment">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!--
+		El plugin mantiene su propia tabla (codeia_logs). WordPress no ofrece
+		ninguna API de alto nivel para tablas custom, asi que $wpdb directo no
+		es un atajo: es la unica via. Las consultas van siempre por prepare()
+		y los identificadores se componen desde $wpdb->prefix, nunca desde
+		entrada del usuario.
+
+		Tampoco tiene sentido cachearlas: escribir un log es una escritura por
+		definicion, y la purga es una operacion de mantenimiento.
+	-->
+	<rule ref="WordPress.DB.DirectDatabaseQuery">
+		<exclude-pattern>src/Core/Logger.php</exclude-pattern>
+		<exclude-pattern>uninstall.php</exclude-pattern>
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!-- El stub de wp_json_encode() replica json_encode() a proposito. -->
+	<rule ref="WordPress.WP.AlternativeFunctions.json_encode_json_encode">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!--
+		El bootstrap de tests corre por CLI antes de que WordPress exista:
+		WP_Filesystem no esta cargado y fwrite(STDERR) es la unica via de
+		diagnostico. putenv() es como wp-phpunit recibe la ruta de su
+		configuracion; no hay alternativa.
+	-->
+	<rule ref="WordPress.WP.AlternativeFunctions.file_system_operations_fwrite">
+		<exclude-pattern>tests/bootstrap.php</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_putenv">
+		<exclude-pattern>tests/bootstrap.php</exclude-pattern>
+	</rule>
+
+	<!--
+		$wpdb->prepare() parametriza valores, nunca identificadores: un nombre
+		de tabla no admite marcador de posicion. En los tests se compone
+		siempre desde $wpdb->prefix, jamas desde entrada externa.
+	-->
+	<rule ref="WordPress.DB.PreparedSQL">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<!-- Prefijos validos para lo que si es global: opciones, hooks, constantes. -->
+	<rule ref="WordPress.NamingConventions.ValidHookName">
+		<properties>
+			<property name="additionalWordDelimiters" value="/"/>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array" value="wp-api-codeia"/>
+		</properties>
+	</rule>
+
+	<!-- Compatibilidad con el minimo declarado en composer.json. -->
+	<config name="testVersion" value="8.0-"/>
+	<rule ref="PHPCompatibilityWP"/>
+
+	<config name="minimum_wp_version" value="7.1"/>
+
+	<!-- Los tests no necesitan la documentacion de cada metodo. -->
+	<rule ref="Squiz.Commenting.FunctionComment">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.ClassComment">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/admin-ui/*</exclude-pattern>
+
+</ruleset>

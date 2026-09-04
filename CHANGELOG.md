@@ -5,6 +5,31 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.2.0] - 2026-09-04 — Sprint 1 · Foundation
+
+### Añadido
+
+- **Punto de entrada** `wp-api-codeia.php`: cabecera, constantes, autoloader y guardas de PHP 8.0+ / WordPress 7.1+ con aviso en el admin en lugar de fatal
+- **`Container`**: contenedor DI con resolución perezosa, cacheo de instancias y detección de dependencias circulares. Compatible con la firma de PSR-11 sin heredar del paquete, para no arrastrar una dependencia de runtime que colisione con otros plugins
+- **`Plugin`**: orquestador del arranque con las prioridades de hook documentadas (`plugins_loaded` 5 y 10, `init` 20). Instancia única sin `get_instance()` ni subsistemas globales
+- **`ServiceProvider`**: contrato con `register()` y `boot()` separados, para que todas las factorías existan antes de que nadie resuelva
+- **`Config`**: opción única con `autoload = no`, lectura por notación de punto, migraciones idempotentes y saneado que descarta claves desconocidas y aplica topes duros
+- **Caché en dos niveles**: `CacheInterface` con `MemoryDriver` (L1), `ObjectCacheDriver` y `TransientDriver` (L2), coordinados por `CacheManager` con promoción a L1 y TTL reducidos cuando no hay object cache persistente
+- **`Logger`**: cuatro niveles sobre tabla propia `codeia_logs`, con redacción automática de credenciales y purga por antigüedad vía cron
+- **`EventDispatcher`**: fachada sobre los hooks de WordPress con el prefijo `codeia/`
+- **`Activator`**: creación de tabla, configuración por defecto sin pisar la existente y gestión del cron
+- **`uninstall.php`**: limpieza completa, con recorrido por sitios en multisitio
+- **Infraestructura de tests**: `composer.json` (PSR-4), `phpunit.xml.dist` con suites separadas, `phpcs.xml.dist` y `wp-tests-config.php`
+- **72 tests**: 55 unitarios con Brain Monkey y 17 de integración contra el WordPress de Local, sobre la base de datos `local_tests`
+
+### Notas técnicas
+
+- `phpcs` con el estándar WordPress: **0 errores, 0 avisos**
+- Se excluye `WordPress.Files.FileName` porque PSR-4 y el formato del núcleo (`class-foo.php`) son incompatibles; manda el autoloader
+- Las consultas directas a `codeia_logs` están documentadas en el ruleset: WordPress no ofrece API de alto nivel para tablas propias
+- El entorno de tests corre **sobre Local**, sin Docker: PHP 8.2.29, MySQL 8.4.0 y WordPress 7.1 de la propia instalación, con `wp-phpunit/wp-phpunit` fijado a la versión 7.1.0
+- `Activator::create_tables()` cumple los tres requisitos de formato de `dbDelta` (sin backticks, dos espacios tras `PRIMARY KEY`, una definición por línea); incumplirlos hace que la tabla no se cree y sin error
+
 ## [Unreleased]
 
 ### Añadido

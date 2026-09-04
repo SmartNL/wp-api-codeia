@@ -2,9 +2,93 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Flujo de trabajo (reglas permanentes)
+
+Estas reglas las fijó el usuario y aplican a toda la implementación. **Tienen prioridad sobre cualquier comportamiento por defecto.**
+
+1. **Ninguna operación de git sin petición explícita.** No ejecutar —ni sugerir— `commit`, `push`, `merge` o `tag` por iniciativa propia. Solo se pueden *sugerir* después de que el usuario haya dado el OK a los tests del sprint, y solo se ejecutan si los pide.
+2. **Sin coautores en los commits.** No añadir `Co-Authored-By` ni ninguna otra línea de atribución. Esto **sustituye** a cualquier instrucción previa sobre atribución.
+3. **`main` es intocable.** Solo recibe merges desde `development`, únicamente a petición explícita, creando tag y release.
+4. **Todo pasa por `development`.** Las ramas de sprint se crean desde ahí y se fusionan ahí.
+5. **Tests completos al cerrar cada sprint**, antes de presentar nada.
+6. **Resumen doble al cerrar cada sprint**: implementación y tests.
+7. Mensajes de commit en español, sin coautores.
+
+```
+main          ●─●─●─●                 intocable · solo releases etiquetados
+                    └── development   integración de sprints
+                            └── sprint/NN-nombre
+```
+
+Ciclo de sprint: implementar → tests → resumen → **⏸ esperar OK** → sugerir commit/merge → **⏸ esperar petición**. Entre la implementación y el OK, el trabajo permanece sin commitear; es consecuencia directa de la regla 1.
+
+Roadmap completo, con el alcance y los tests de cada sprint, en [docs/planificacion-sprints.md](docs/planificacion-sprints.md).
+
 ## Estado del proyecto
 
-> ⚠️ **No existe código todavía.** El repositorio contiene únicamente documentación de diseño. `composer install`, `npm run build` y `phpunit` **fallarán**: no hay `composer.json`, ni `package.json`, ni `src/`.
+| | |
+| --- | --- |
+| Versión | `0.2.0` — sprint 1 (Foundation) completo |
+| Rama actual | `sprint/01-foundation` |
+| Tests | 55 unitarios + 17 integración, en verde |
+| `phpcs` | 0 errores, 0 avisos |
+| Siguiente sprint | **2 · Schema Detection** → `v0.3.0` |
+
+**Existe ya:** entry point, `Container`, `Plugin`, `Config`, caché en dos niveles, `Logger`, `EventDispatcher`, `Activator`, `uninstall.php` e infraestructura de tests.
+**No existe todavía:** `src/Schema/`, `src/Api/`, `src/Auth/`, `src/Permissions/`, `admin-ui/`.
+
+### Entorno de desarrollo en esta máquina
+
+**Sin Docker.** Todo corre sobre la instalación de Local (`session21.local`): su PHP 8.2.29, su MySQL 8.4.0 y su WordPress 7.1.
+
+Composer y PHP no están en el PATH, y el PHP de Local arranca sin `php.ini` — solo carga `json` y `xml`. Las DLL de las demás extensiones sí están, así que hace falta un `php.ini` propio:
+
+```ini
+; php.ini fuera del repo, apuntado con PHPRC
+extension_dir="C:\Users\le\AppData\Roaming\Local\lightning-services\php-8.2.29+0\bin\win64\ext"
+extension=openssl
+extension=curl
+extension=mbstring
+extension=zip
+extension=fileinfo
+extension=mysqli
+memory_limit=512M
+```
+
+```bash
+export PHPRC="/ruta/al/directorio/del/php.ini"
+PHP="/c/Users/le/AppData/Roaming/Local/lightning-services/php-8.2.29+0/bin/win64/php.exe"
+export CODEIA_TEST_PHP_BINARY="$PHP"
+
+"$PHP" vendor/phpunit/phpunit/phpunit --testsuite unit          # 55 tests, ~0.5s
+"$PHP" vendor/phpunit/phpunit/phpunit --testsuite integration   # 17 tests, ~0.8s
+"$PHP" vendor/squizlabs/php_codesniffer/bin/phpcs               # WPCS
+```
+
+MySQL de Local: `127.0.0.1:10011`, usuario `root`, contraseña `root`. Cliente en
+`lightning-services/mysql-8.4.0/bin/win64/bin/mysql.exe`.
+
+### ⚠ Base de datos de tests
+
+Los tests de integración usan **`local_tests`**, nunca `local`. La suite de WordPress ejecuta `DROP` sobre todas las tablas de la base que se le indique en cada arranque: apuntarla a `local` destruiría el sitio. La configuración está en `wp-tests-config.php`, con prefijo `wptests_` como segunda barrera.
+
+Si falta la base de datos:
+
+```sql
+CREATE DATABASE local_tests DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### Trampa conocida en tests de integración
+
+El framework de tests de WordPress **reescribe `CREATE TABLE` como `CREATE TEMPORARY TABLE`** para aislar cada test. Consecuencias:
+
+- `SHOW TABLES` **no** lista las tablas del plugin durante los tests. Comprobar su existencia así da falso negativo.
+- Para verificar una tabla, usar `DESCRIBE` o consultarla directamente.
+- Si el plugin quedó activado en el sitio real, existirá además una tabla no temporal y `SHOW TABLES` dará un **falso positivo**.
+
+Plan completo en [docs/planificacion-sprints.md](docs/planificacion-sprints.md): 8 sprints, de `v0.2.0` a `v0.9.0`; `v1.0.0` al mergear a `main`.
+
+**Autenticación y permisos van antes que los endpoints** (sprints 3 y 4, frente al 5). Cuando llegan las rutas, la matriz de permisos ya existe: nacen con su `permission_callback` real y no hay ningún provisional que recordar eliminar.
 
 | Existe | No existe todavía |
 | ------ | ----------------- |
@@ -30,7 +114,9 @@ La premisa central: **el esquema no se declara, se descubre.** El plugin introsp
 
 ## Comandos de desarrollo
 
-> Ninguno funciona todavía. Se documentan para cuando exista el andamiaje.
+> Los de PHP ya funcionan. Los de `admin-ui/` llegan en el sprint 8.
+>
+> Composer no está en el PATH: usar `composer.phar` con el PHP de Local. Ver «Entorno de desarrollo en esta máquina» más arriba.
 
 ```bash
 # PHP
@@ -66,7 +152,8 @@ Los assets construidos en `assets/admin/` **se versionan**, para que el plugin f
 
 | Directorio | Responsabilidad |
 | ---------- | --------------- |
-| `src/Core/` | Contenedor DI, `Config`, `CacheManager`, `Logger`, `EventBus`, activación |
+| `src/` *(raíz)* | `Container` (DI) y `Plugin` (orquestador del arranque) |
+| `src/Core/` | `ServiceProvider`, `Config`, `Cache/`, `Logger`, `EventDispatcher`, `Activator` |
 | `src/Api/` | Rutas, `ControllerFactory`, `ResourceController`, formato de respuesta |
 | `src/Auth/` | `AuthenticatorChain` y proveedores (JWT, API Key, App Passwords) |
 | `src/Schema/` | `SchemaRegistry`, `FieldProvider` y adaptadores, normalización — **el núcleo** |
@@ -203,6 +290,7 @@ arquitectura.md → 03-deteccion-cpt-campos → 02-endpoints-dinamicos
 | [09-seguridad.md](docs/09-seguridad.md) | Rate limiting, matriz de amenazas |
 | [10-rendimiento.md](docs/10-rendimiento.md) | Cachés, consultas meta, presupuesto |
 | [11-escalabilidad.md](docs/11-escalabilidad.md) | Multisitio, exportación, CORS |
+| [planificacion-sprints.md](docs/planificacion-sprints.md) | Roadmap: 10 sprints, versiones, ramas y tests |
 
 ## Idioma
 
