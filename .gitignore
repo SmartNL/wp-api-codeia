@@ -5,11 +5,15 @@ node_modules/
 # Caché de Vite
 admin-ui/.vite/
 
+# Configuración local que sobrescribe wp-tests-config.php
+wp-tests-config.local.php
+
 # NOTA: assets/admin/ NO se ignora. Es la salida del build del dashboard
 # y se versiona para que el plugin funcione desde un clon o zip sin Node.
-
-# Composer
-composer.lock
+#
+# Lo mismo vale para assets/vendor/swagger-ui/, que copia ahi el script
+# "vendor:swagger": la pantalla de documentacion no puede cargar Swagger UI
+# desde un CDN, asi que el fichero tiene que viajar con el plugin.
 
 # Archivos del sistema operativo
 .DS_Store

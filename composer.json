@@ -1,0 +1,61 @@
+{
+    "name": "sn4p/wp-api-codeia",
+    "description": "Convierte WordPress en una API personalizada configurable desde un dashboard propio",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "sn4p.dev",
+            "homepage": "https://sn4p.dev"
+        }
+    ],
+    "require": {
+        "php": ">=8.0"
+    },
+    "require-dev": {
+        "brain/monkey": "^2.6",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "mockery/mockery": "^1.6",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "phpunit/phpunit": "^9.6",
+        "squizlabs/php_codesniffer": "^3.9",
+        "wp-coding-standards/wpcs": "^3.1",
+        "wp-phpunit/wp-phpunit": "^7.1",
+        "yoast/phpunit-polyfills": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WpApi\\Codeia\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WpApi\\Codeia\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": [
+            "@test:unit",
+            "@test:integration"
+        ],
+        "test:unit": "phpunit --testsuite unit",
+        "test:integration": "phpunit --testsuite integration",
+        "db:create": "echo \"CREATE DATABASE IF NOT EXISTS local_tests DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\"",
+        "lint": "phpcs",
+        "lint:fix": "phpcbf"
+    },
+    "scripts-descriptions": {
+        "test": "Ejecuta las suites unit e integracion",
+        "test:unit": "Tests unitarios con WordPress mockeado (no necesita base de datos)",
+        "test:integration": "Tests de integracion contra el WordPress de Local, usando la base de datos local_tests",
+        "db:create": "Imprime el SQL para crear la base de datos de tests",
+        "lint": "Analiza src/ y tests/ con los WordPress Coding Standards",
+        "lint:fix": "Corrige automaticamente lo que phpcbf puede arreglar"
+    }
+}
