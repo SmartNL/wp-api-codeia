@@ -1,0 +1,8 @@
+swagger-ui-dist 5.32.15
+Licencia Apache-2.0.
+
+Copiado por admin-ui/scripts/vendor-swagger.mjs. No editar a mano.
+
+Se sirve desde el propio sitio y nunca desde un CDN: la pantalla de
+documentacion esta detras del login del administrador y cargar un script
+de terceros ahi daria a ese tercero ejecucion en el contexto del panel.

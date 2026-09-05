@@ -28,25 +28,36 @@ Roadmap completo, con el alcance y los tests de cada sprint, en [docs/planificac
 
 | | |
 | --- | --- |
-| Versión | `0.9.0` — los 8 sprints completos |
-| Rama actual | `sprint/08-dashboard-admin` |
-| Tests | 245 unitarios + 169 integración + 6 JS, en verde |
-| `phpcs` | 0 errores (1 aviso, falso positivo de `prepare`) |
+| Versión | `0.10.0` — los 8 sprints completos, con el dashboard terminado |
+| Rama actual | `sprint/08-dashboard-ui` |
+| Tests | 245 unitarios + 192 integración + 48 JS, en verde |
+| `phpcs` | 0 errores, 21 avisos justificados |
 | Siguiente hito | **v1.0.0** — merge de `development` a `main` |
 | Remoto | [SmartNL/wp-api-codeia](https://github.com/SmartNL/wp-api-codeia) (privado) |
 
 ### Para retomar
 
-El siguiente paso es el **sprint 5 · Endpoints CRUD** (`v0.6.0`), documentos [02-endpoints-dinamicos.md](docs/02-endpoints-dinamicos.md) y [07-rewrite-rules.md](docs/07-rewrite-rules.md).
+Los ocho sprints están implementados y el dashboard tiene sus siete pantallas
+construidas contra la API interna. Lo que queda es la decisión del usuario:
+fusionar `development` en `main` y etiquetar `v1.0.0`.
 
 ```bash
 git switch development && git pull
-git switch -c sprint/05-endpoints-crud
 ```
 
-Entregables: `src/Api/` (`RouteRegistrar`, `ControllerFactory`, `ResourceController` sobre `WP_REST_Controller`, `QueryBuilder`, `FieldProjector`, `CursorPaginator`, `ResponseFormatter`, `ErrorFormatter`) y `src/Rewrite/` (`RewriteModule`, `CollisionDetector`, `RequestForwarder`).
+**No ejecutar ninguna operación de git sin petición explícita.** Ver «Flujo de
+trabajo» arriba.
 
-Las rutas nacen con el `PermissionResolver` del sprint 4: **no hay `permission_callback` provisional en ningún momento**.
+#### Trabajo pendiente conocido
+
+- **`media.max_bytes` es configuración muerta.** `StatusChecker` la lee con
+  `config->get( 'media.max_bytes.editor', ... )`, pero `media` no existe en
+  `Config::defaults()` y `Config::sanitize()` solo conserva las claves de
+  primer nivel que sí existen: el valor nunca puede guardarse, así que la
+  comprobación siempre compara contra el valor por defecto. Hay que decidir si
+  se añade la rama a los defaults o se elimina la comprobación
+- **Sin CI.** Los scripts de Composer y de npm encajan directamente en un
+  workflow de GitHub Actions cuando se quiera
 
 ### Entorno de desarrollo en esta máquina
 

@@ -83,18 +83,47 @@ final class AuthServiceProvider implements ServiceProvider {
 		$container->set(
 			AuthenticatorChain::class,
 			static function ( Container $c ): AuthenticatorChain {
-				$chain = new AuthenticatorChain( $c->get( EventDispatcher::class ) );
+				$chain  = new AuthenticatorChain( $c->get( EventDispatcher::class ) );
+				$config = $c->get( Config::class );
 
-				$chain->add(
-					new JwtAuthenticator(
-						$c->get( JwtCodec::class ),
-						$c->get( TokenVersion::class ),
-						$c->get( RevocationList::class )
-					)
-				);
-				$chain->add( new UserTokenAuthenticator( $c->get( TokenRepository::class ) ) );
-				$chain->add( new ApiKeyAuthenticator( $c->get( TokenRepository::class ) ) );
-				$chain->add( new AppPasswordAuthenticator() );
+				/*
+				 * Un proveedor desactivado no se monta. Antes se montaban los
+				 * cuatro y la configuracion solo afectaba al documento OpenAPI:
+				 * desactivar api_key lo ocultaba de la documentacion pero
+				 * seguia aceptando la credencial, que es lo contrario de lo que
+				 * espera quien lo desactiva.
+				 */
+				$enabled = static function ( string $id ) use ( $config ): bool {
+					$settings = $config->get( 'auth.providers.' . $id, false );
+
+					if ( is_array( $settings ) ) {
+						return ! empty( $settings['enabled'] );
+					}
+
+					return (bool) $settings;
+				};
+
+				if ( $enabled( 'jwt' ) ) {
+					$chain->add(
+						new JwtAuthenticator(
+							$c->get( JwtCodec::class ),
+							$c->get( TokenVersion::class ),
+							$c->get( RevocationList::class )
+						)
+					);
+				}
+
+				if ( $enabled( 'user_token' ) ) {
+					$chain->add( new UserTokenAuthenticator( $c->get( TokenRepository::class ) ) );
+				}
+
+				if ( $enabled( 'api_key' ) ) {
+					$chain->add( new ApiKeyAuthenticator( $c->get( TokenRepository::class ) ) );
+				}
+
+				if ( $enabled( 'app_password' ) ) {
+					$chain->add( new AppPasswordAuthenticator() );
+				}
 
 				return $chain;
 			}

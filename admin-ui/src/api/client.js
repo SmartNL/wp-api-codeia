@@ -64,7 +64,16 @@ export class ApiError extends Error {
 
 export const getResources = () => request( 'resources' );
 export const getStatus = () => request( 'status' );
-export const getLogs = () => request( 'logs' );
+export const getLogs = ( query = '' ) => request( 'logs' + query );
 export const rebuildSchema = () => request( 'schema/rebuild', { method: 'POST' } );
 export const saveSettings = ( payload ) =>
 	request( 'settings', { method: 'PATCH', body: JSON.stringify( payload ) } );
+export const getSettings = () => request( 'settings' );
+export const getRoles = () => request( 'roles' );
+export const exportConfig = () => request( 'export' );
+export const purgeLogs = () => request( 'logs', { method: 'DELETE' } );
+export const importConfig = ( document, dryRun = true ) =>
+	request( `import?dry_run=${ dryRun ? '1' : '0' }`, {
+		method: 'POST',
+		body: JSON.stringify( document ),
+	} );

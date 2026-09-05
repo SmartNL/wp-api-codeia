@@ -70,7 +70,20 @@ final class Config {
 				'rewrite' => false,
 			),
 			'auth'        => array(
-				'providers' => array(),
+
+				/*
+				 * Criterio de docs/01-autenticacion.md: Application Passwords
+				 * por coste cero y respaldo del nucleo, JWT para sesiones
+				 * cortas con refresh. API Key y token de usuario solo cuando
+				 * hagan falta, porque amplian la superficie de credenciales
+				 * de larga vida.
+				 */
+				'providers' => array(
+					'jwt'          => true,
+					'app_password' => true,
+					'api_key'      => false,
+					'user_token'   => false,
+				),
 			),
 			'resources'   => array(),
 			'permissions' => array(),
