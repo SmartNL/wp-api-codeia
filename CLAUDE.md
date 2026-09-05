@@ -28,11 +28,11 @@ Roadmap completo, con el alcance y los tests de cada sprint, en [docs/planificac
 
 | | |
 | --- | --- |
-| Versión | `0.10.0` — los 8 sprints completos, con el dashboard terminado |
-| Rama actual | `sprint/08-dashboard-ui` |
+| Versión | `1.0.0` — los 8 sprints completos, publicada en `main` |
+| Rama actual | `development` |
 | Tests | 245 unitarios + 192 integración + 48 JS, en verde |
 | `phpcs` | 0 errores, 21 avisos justificados |
-| Siguiente hito | **v1.0.0** — merge de `development` a `main` |
+| Siguiente hito | — |
 | Remoto | [SmartNL/wp-api-codeia](https://github.com/SmartNL/wp-api-codeia) (privado) |
 
 ### Para retomar

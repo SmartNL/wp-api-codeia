@@ -5,6 +5,50 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.0.0] - 2026-09-05 — Primera versión estable
+
+Primera publicación en `main`. Reúne los ocho sprints del roadmap sin cambios
+funcionales respecto a `0.10.0`: es la misma base, etiquetada como estable.
+
+El plugin convierte WordPress en una API configurable desde su propio panel.
+La premisa que lo ordena todo es que **el esquema no se declara, se descubre**:
+el plugin introspecciona la instalación y presenta lo encontrado como catálogo
+configurable, del que derivan los endpoints, el documento OpenAPI y las reglas
+de acceso.
+
+### Contenido
+
+| Sprint | Versión | Aportación |
+| ------ | ------- | ---------- |
+| 1 | `0.2.0` | Contenedor DI, configuración, caché, registro, activación |
+| 2 | `0.3.0` | Detección de esquema en cuatro niveles |
+| 3 | `0.4.0` | Autenticación: JWT, API Key, Application Passwords, tokens |
+| 4 | `0.5.0` | Permisos: matriz de cuatro ejes sobre las capabilities |
+| 5 | `0.6.0` | Endpoints CRUD derivados, filtros, paginación por cursor |
+| 6 | `0.7.0` | Medios con validación por contenido, y límite de peticiones |
+| 7 | `0.8.0` | OpenAPI 3.1, ETag, alias de rutas en raíz |
+| 8 | `0.9.0` · `0.10.0` | Dashboard: siete pantallas sobre la API interna |
+
+### Estado
+
+```
+245 tests unitarios · 370 aserciones
+192 tests de integración · 418 aserciones
+ 48 tests de JavaScript · 7 ficheros
+phpcs: 0 errores, 21 avisos justificados
+```
+
+### Deuda conocida
+
+- **`media.max_bytes` es configuración muerta.** `StatusChecker` la lee, pero
+  `media` no existe en `Config::defaults()` y `Config::sanitize()` solo
+  conserva las claves de primer nivel que sí existen: el valor nunca puede
+  guardarse, así que la comprobación siempre compara contra el valor por
+  defecto
+- **Sin integración continua.** Los scripts de Composer y de npm encajan
+  directamente en un workflow de GitHub Actions
+
+
 ## [0.10.0] - 2026-09-05 — Dashboard completo y correcciones de coherencia
 
 Cierra el sprint 8, que se entregó con el backend terminado pero la interfaz
