@@ -5,6 +5,75 @@ Todos los cambios notables de este proyecto se documentan en este archivo.
 El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
 y este proyecto sigue [Semantic Versioning](https://semver.org/lang/es/).
 
+## [0.10.0] - 2026-09-05 — Dashboard completo y correcciones de coherencia
+
+Cierra el sprint 8, que se entregó con el backend terminado pero la interfaz
+reducida a un volcado de JSON. Al construir las pantallas contra la API real
+aparecieron cuatro defectos de coherencia entre módulos que la interfaz dejó
+al descubierto; van corregidos aquí.
+
+### Corregido
+
+- **`auth.providers` no hacía nada.** El generador de OpenAPI respetaba la
+  configuración pero `AuthServiceProvider` montaba los cuatro autenticadores
+  siempre. Desactivar API Key lo ocultaba de la documentación y **seguía
+  aceptando la credencial**, justo lo contrario de lo que espera quien lo
+  desactiva. Ahora un proveedor desactivado no se monta
+- **`permissions.defaults` se descartaba al guardar.** El nivel 1 de la matriz
+  es un mapa `rol => booleano`, de forma distinta a los demás nodos, y
+  `sanitize_permissions()` lo tiraba entero por no ser un array de reglas. El
+  nivel 1 era inalcanzable desde el panel
+- **El bundle dependía de un global no declarado.** El JSX se compilaba con el
+  runtime clásico, que emite `React.createElement` sin declarar `React`;
+  funcionaba solo porque `wp-element` arrastra el script `react` del núcleo.
+  Ahora el JSX se compila contra `createElement` importado de
+  `@wordpress/element`
+- **`StatusChecker` devolvía identificadores, no etiquetas.** Un semáforo sin
+  texto es ilegible para quien no distingue rojo y verde
+- **Los tres módulos eran inalcanzables desde el panel.** `media`, `openapi` y
+  `rewrite` están apagados de origen —cada uno amplía la superficie expuesta—
+  pero ninguna pantalla los activaba: solo se podían encender editando la
+  opción a mano. La pantalla de Documentación mostraba el «Failed to load API
+  definition» crudo de Swagger UI, que no explica la causa ni ofrece salida
+- **`RewriteModule::request_flush()` no lo llamaba nadie.** Cambiar el
+  namespace o activar el alias guardaba la opción y dejaba las reglas viejas
+  en su sitio: el alias respondía 404. Ahora `update_settings` marca la
+  regeneración cuando cambia algo que afecta al enrutado, y solo entonces
+
+### Añadido
+
+- **Las siete pantallas, con contenido real**: Estado con semáforo etiquetado y
+  cifras del esquema; Recursos con catálogo por campo —origen, confianza,
+  candado de meta protegida, aviso de tipo ambiguo y relación propuesta—;
+  Permisos con la cascada de cuatro niveles y el nivel 1 por separado;
+  Autenticación con el criterio de cada proveedor; Documentación con Swagger
+  UI; Registros con filtro por nivel y contexto desplegable; Herramientas con
+  reconstrucción, exportación, importación y purga
+- **Swagger UI servido en local** desde `assets/vendor/swagger-ui/`, copiado por
+  el script `vendor:swagger`. Nunca desde un CDN: la pantalla vive detrás del
+  login del administrador y un script de terceros ahí tendría ejecución en el
+  contexto del panel. Se encola **solo** en la pantalla de documentación, porque
+  son 1,7 MB
+- **`POST admin/import`**: importación con simulación por defecto y **copia
+  previa** antes de escribir. Aplicar exige pedirlo explícitamente: la
+  importación sustituye la configuración entera y no hay deshacer
+- **`DELETE admin/logs`**, que deja constancia de sí misma; `GET admin/settings`
+  y `GET admin/roles`; filtros `level` y `channel` en `GET admin/logs`
+- **Valores por defecto de `auth.providers`** según `docs/01-autenticacion.md`:
+  Application Passwords y JWT activos, API Key y token de usuario no. Las
+  credenciales de larga vida no se activan solas
+- **Saneado de `auth` y `logging`**, con la retención de registros acotada
+  entre 1 y 365 días
+- **`.gitattributes`** con `* text=auto eol=lf`, pendiente desde el andamiaje
+- **`composer.lock` versionado**: sin él, cada `composer install` trae versiones
+  distintas y `wp-phpunit` deja de coincidir con el WordPress instalado
+- **Tarjeta de módulos** en Herramientas, con el motivo de que cada uno esté
+  apagado de origen, y activación en contexto desde la propia pantalla de
+  Documentación
+- **51 tests nuevos**: 9 de integración PHP y 42 de JavaScript, incluidos los
+  primeros de renderizado con Testing Library
+
+
 ## [0.9.0] - 2026-09-04 — Sprint 8 · Dashboard Admin
 
 ### Añadido

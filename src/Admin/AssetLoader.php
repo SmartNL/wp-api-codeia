@@ -29,6 +29,16 @@ final class AssetLoader {
 	public const HANDLE = 'codeia-admin';
 
 	/**
+	 * Handle de Swagger UI.
+	 */
+	public const SWAGGER_HANDLE = 'codeia-swagger-ui';
+
+	/**
+	 * Sufijo de la pantalla de documentacion.
+	 */
+	private const DOCS_SCREEN = 'codeia-api-docs';
+
+	/**
 	 * Configuracion.
 	 *
 	 * @var Config
@@ -103,6 +113,8 @@ final class AssetLoader {
 			);
 		}
 
+		$this->enqueue_swagger( $hook_suffix );
+
 		/*
 		 * Posicion 'before': con React montandose al cargar, inyectar la
 		 * configuracion despues dejaria la aplicacion sin root ni nonce en su
@@ -112,6 +124,48 @@ final class AssetLoader {
 			self::HANDLE,
 			sprintf( 'window.codeiaAdmin = %s;', (string) wp_json_encode( $this->boot_data() ) ),
 			'before'
+		);
+	}
+
+	/**
+	 * Encola Swagger UI, solo en la pantalla de documentacion.
+	 *
+	 * Son 1,7 MB entre script y hoja de estilos: cargarlos en las otras seis
+	 * pantallas multiplicaria por diez el peso del panel sin que nada los use.
+	 *
+	 * Se sirven desde assets/vendor/ y nunca desde un CDN. Esta pantalla vive
+	 * detras del login del administrador; un script de terceros aqui tendria
+	 * ejecucion en el contexto del panel.
+	 *
+	 * @param string $hook_suffix Sufijo de la pantalla actual.
+	 * @return void
+	 */
+	private function enqueue_swagger( string $hook_suffix ): void {
+		if ( ! str_contains( $hook_suffix, self::DOCS_SCREEN ) ) {
+			return;
+		}
+
+		$bundle = CODEIA_PLUGIN_DIR . 'assets/vendor/swagger-ui/swagger-ui-bundle.js';
+
+		if ( ! file_exists( $bundle ) ) {
+			// Sin el vendorizado la pantalla cae a su vista propia, que no
+			// depende de Swagger UI. No se rompe el panel.
+			return;
+		}
+
+		wp_enqueue_script(
+			self::SWAGGER_HANDLE,
+			CODEIA_PLUGIN_URL . 'assets/vendor/swagger-ui/swagger-ui-bundle.js',
+			array(),
+			CODEIA_VERSION,
+			true
+		);
+
+		wp_enqueue_style(
+			self::SWAGGER_HANDLE,
+			CODEIA_PLUGIN_URL . 'assets/vendor/swagger-ui/swagger-ui.css',
+			array(),
+			CODEIA_VERSION
 		);
 	}
 
@@ -126,6 +180,15 @@ final class AssetLoader {
 				rest_url(
 					sprintf(
 						'%s/%s/admin/',
+						(string) $this->config->get( 'namespace', 'codeia' ),
+						(string) $this->config->get( 'api_version', 'v1' )
+					)
+				)
+			),
+			'specUrl'   => esc_url_raw(
+				rest_url(
+					sprintf(
+						'%s/%s/docs',
 						(string) $this->config->get( 'namespace', 'codeia' ),
 						(string) $this->config->get( 'api_version', 'v1' )
 					)

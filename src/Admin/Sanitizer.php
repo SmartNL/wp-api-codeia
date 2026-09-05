@@ -66,6 +66,8 @@ final class Sanitizer {
 
 		$clean['resources']   = $this->sanitize_resources( $clean['resources'] );
 		$clean['permissions'] = $this->sanitize_permissions( $clean['permissions'] );
+		$clean['auth']        = $this->sanitize_auth( $clean['auth'] ?? array() );
+		$clean['logging']     = $this->sanitize_logging( $clean['logging'] ?? array() );
 
 		$this->logger->info(
 			'Configuracion actualizada.',
@@ -77,6 +79,55 @@ final class Sanitizer {
 		);
 
 		return $clean;
+	}
+
+	/**
+	 * Sanea la rama de autenticacion.
+	 *
+	 * Solo sobreviven los cuatro proveedores conocidos, y siempre como
+	 * booleano. Una clave inventada aqui no haria nada, pero quedaria
+	 * almacenada dando la impresion de que si.
+	 *
+	 * @param mixed $auth Rama entrante.
+	 * @return array<string, mixed>
+	 */
+	public function sanitize_auth( $auth ): array {
+		$known     = array( 'jwt', 'app_password', 'api_key', 'user_token' );
+		$incoming  = is_array( $auth ) && is_array( $auth['providers'] ?? null ) ? $auth['providers'] : array();
+		$providers = array();
+
+		foreach ( $known as $id ) {
+			$value = $incoming[ $id ] ?? false;
+
+			if ( is_array( $value ) ) {
+				$value = ! empty( $value['enabled'] );
+			}
+
+			$providers[ $id ] = (bool) $value;
+		}
+
+		return array( 'providers' => $providers );
+	}
+
+	/**
+	 * Sanea la rama de registro.
+	 *
+	 * La retencion se acota por arriba: un valor enorme convierte la tabla de
+	 * logs en el objeto mas grande de la base de datos sin que nadie lo note
+	 * hasta que el disco se llena.
+	 *
+	 * @param mixed $logging Rama entrante.
+	 * @return array<string, mixed>
+	 */
+	public function sanitize_logging( $logging ): array {
+		$levels = array( 'debug', 'info', 'warning', 'error' );
+		$level  = is_array( $logging ) ? sanitize_key( (string) ( $logging['level'] ?? 'info' ) ) : 'info';
+		$days   = is_array( $logging ) ? absint( $logging['retention_days'] ?? 30 ) : 30;
+
+		return array(
+			'level'          => in_array( $level, $levels, true ) ? $level : 'info',
+			'retention_days' => max( 1, min( 365, $days ) ),
+		);
 	}
 
 	/**
@@ -155,6 +206,25 @@ final class Sanitizer {
 			$resource = sanitize_key( (string) $resource );
 
 			if ( '' === $resource || ! is_array( $by_role ) ) {
+				continue;
+			}
+
+			/*
+			 * El nivel 1 de la matriz no es un recurso: es el mapa
+			 * rol => booleano que actua de valor por defecto. Su forma es
+			 * distinta de la de los demas nodos y sin este caso aparte se
+			 * descartaria entero, dejando el nivel 1 inalcanzable desde el
+			 * panel.
+			 */
+			if ( 'defaults' === $resource ) {
+				foreach ( $by_role as $role => $allowed ) {
+					$role = sanitize_key( (string) $role );
+
+					if ( in_array( $role, $roles, true ) ) {
+						$clean['defaults'][ $role ] = (bool) $allowed;
+					}
+				}
+
 				continue;
 			}
 

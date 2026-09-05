@@ -1,0 +1,25 @@
+# Finales de linea normalizados a LF en el repositorio.
+#
+# core.autocrlf=true en Windows entra en conflicto con end_of_line = lf de
+# .editorconfig: sin esta declaracion cada commit desde Windows avisa de la
+# conversion y los ficheros llegan al arbol con CRLF mezclado, lo que rompe
+# los scripts de parcheo y ensucia los diffs.
+* text=auto eol=lf
+
+# Binarios: nunca convertir.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
+*.phar binary
+
+# Los ficheros generados no cuentan en las estadisticas de lenguaje ni
+# necesitan revision de diff.
+assets/admin/*.js linguist-generated=true -diff
+composer.lock -diff

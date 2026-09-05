@@ -3,7 +3,7 @@
  * Plugin Name:       WP API Codeia
  * Plugin URI:        https://sn4p.dev/wp-api-codeia
  * Description:       Convierte WordPress en una API personalizada configurable desde un dashboard propio.
- * Version:           0.9.0
+ * Version:           0.10.0
  * Requires at least: 7.1
  * Requires PHP:      8.0
  * Author:            sn4p.dev
@@ -20,7 +20,7 @@ declare( strict_types=1 );
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'CODEIA_VERSION', '0.9.0' );
+define( 'CODEIA_VERSION', '0.10.0' );
 define( 'CODEIA_MIN_PHP', '8.0' );
 define( 'CODEIA_MIN_WP', '7.1' );
 define( 'CODEIA_PLUGIN_FILE', __FILE__ );

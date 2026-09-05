@@ -24,6 +24,24 @@ use WpApi\Codeia\Schema\SchemaRegistry;
  */
 final class StatusChecker {
 
+	/**
+	 * Etiqueta legible de cada comprobacion.
+	 *
+	 * Vive aqui y no en la interfaz porque es texto traducible y el dashboard
+	 * no es el unico consumidor posible del diagnostico.
+	 *
+	 * @var array<string, string>
+	 */
+	private const LABELS = array(
+		'object_cache'  => 'Object cache',
+		'permalinks'    => 'Enlaces permanentes',
+		'ssl'           => 'Transporte cifrado',
+		'php'           => 'Version de PHP',
+		'logging'       => 'Registro',
+		'providers'     => 'Proveedores de campos',
+		'upload_limits' => 'Limites de subida',
+	);
+
 	public const OK      = 'ok';
 	public const WARNING = 'warning';
 	public const ERROR   = 'error';
@@ -76,6 +94,48 @@ final class StatusChecker {
 			$this->check_logging(),
 			$this->check_providers(),
 			$this->check_upload_limits(),
+		);
+	}
+
+	/**
+	 * Cifras del esquema detectado.
+	 *
+	 * Recorre las definiciones ya cacheadas: no fuerza una redeteccion, que en
+	 * un sitio con muchos tipos costaria segundos cada vez que se abre el
+	 * panel.
+	 *
+	 * @return array<string, int>
+	 */
+	public function counts(): array {
+		$resources = 0;
+		$enabled   = 0;
+		$fields    = 0;
+		$inferred  = 0;
+		$conflicts = 0;
+
+		foreach ( array_keys( $this->schema->detectable_post_types() ) as $post_type ) {
+			$definition = $this->schema->definition_for( (string) $post_type );
+
+			if ( null === $definition ) {
+				continue;
+			}
+
+			++$resources;
+			$fields    += count( $definition->fields );
+			$inferred  += count( $definition->inferred_fields() );
+			$conflicts += count( $definition->conflicts );
+
+			if ( $this->config->get( 'resources.' . $post_type . '.enabled', false ) ) {
+				++$enabled;
+			}
+		}
+
+		return array(
+			'resources' => $resources,
+			'enabled'   => $enabled,
+			'fields'    => $fields,
+			'inferred'  => $inferred,
+			'conflicts' => $conflicts,
 		);
 	}
 
@@ -226,8 +286,12 @@ final class StatusChecker {
 	 * @return array<string, string>
 	 */
 	private function row( string $id, string $status, string $message ): array {
+		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText -- Texto de un mapa constante, no dinamico.
+		$label = __( self::LABELS[ $id ] ?? $id, 'wp-api-codeia' );
+
 		return array(
 			'id'      => $id,
+			'label'   => $label,
 			'status'  => $status,
 			'message' => $message,
 		);

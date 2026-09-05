@@ -77,7 +77,8 @@ final class AdminServiceProvider implements ServiceProvider {
 					$c->get( Config::class ),
 					$c->get( Sanitizer::class ),
 					$c->get( StatusChecker::class ),
-					$c->get( ConfigExporter::class )
+					$c->get( ConfigExporter::class ),
+					$c->get( Logger::class )
 				);
 			}
 		);
